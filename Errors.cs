@@ -35,14 +35,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             return String.Format("Assembly '{0}' does not exist", assembly);
         }
 
-        public static string NoModuleConstructorTypeFound()
+        public static string NoModuleInitializerTypeFound()
         {
-            return "Found no type named 'ModuleConstructor', this type must exist or the ModuleConstructor parameter must be used";
+            return "Found no type named 'ModuleInitializer', this type must exist or the ModuleInitializer parameter must be used";
         }
 
-        public static string InvalidFormatForModuleConstructor()
+        public static string InvalidFormatForModuleInitializer()
         {
-            return "Invalid format for ModuleConstructor parameter, use Full.Type.Name::MethodName";
+            return "Invalid format for ModuleInitializer parameter, use Full.Type.Name::MethodName";
         }
         
         public static string TypeNameDoesNotExist(string typeName)
@@ -55,14 +55,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             return string.Format("No suitable method named '{0}' found in type '{1}'", methodName, typeName);
         }
         
-        public static string ModuleConstructorMayNotBePrivate()
+        public static string ModuleInitializerMayNotBePrivate()
         {
-            return "Module constructor may not be private or protected, use public or internal instead";
+            return "Module initializer may not be private or protected, use public or internal instead";
         }
         
-        public static string ModuleConstructorMustBeVoid()
+        public static string ModuleInitializerMustBeVoid()
         {
-            return "Module constructor must have 'void' as return type";
+            return "Module initializer must have 'void' as return type";
         }
     }
 }

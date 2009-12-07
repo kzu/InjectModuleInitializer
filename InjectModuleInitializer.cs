@@ -33,14 +33,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         [Required]
         public string AssemblyName { get; set; }
-        public string ModuleConstructor { get; set; }
+        public string ModuleInitializer { get; set; }
         private readonly InjectModuleInitializerImpl impl = new InjectModuleInitializerImpl();
         
         public override bool Execute()
         {
             impl.LogError = Log.LogError;
             impl.AssemblyName = AssemblyName;
-            impl.ModuleConstructor = ModuleConstructor;
+            impl.ModuleInitializer = ModuleInitializer;
             return impl.Execute();
         }
     }

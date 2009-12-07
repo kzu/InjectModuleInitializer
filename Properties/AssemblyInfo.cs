@@ -31,11 +31,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("InjectModuleConstructor")]
-[assembly: AssemblyDescription("Inject a module constructor into a .NET assembly")]
+[assembly: AssemblyTitle("InjectModuleInitializer")]
+[assembly: AssemblyDescription("Inject a module initializer into a .NET assembly")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Einar Egilsson")]
-[assembly: AssemblyProduct("InjectModuleConstructor")]
+[assembly: AssemblyProduct("InjectModuleInitializer")]
 [assembly: AssemblyCopyright("Copyright © Einar Egilsson 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

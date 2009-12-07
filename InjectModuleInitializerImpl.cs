@@ -35,7 +35,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         public delegate void ErrorLogger(string msg, params object[] args);
         public string AssemblyName { get; set; }
-        public string ModuleConstructor { get; set; }
+        public string ModuleInitializer { get; set; }
         public ErrorLogger LogError { get; set; }
 
         public bool Execute()
@@ -85,12 +85,12 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         {
             ModuleDefinition module = assembly.MainModule;
             string typeName = null, methodName;
-            if (string.IsNullOrEmpty(ModuleConstructor))
+            if (string.IsNullOrEmpty(ModuleInitializer))
             {
                 methodName = "Run";
                 foreach (TypeDefinition t in module.Types)
                 {
-                    if (t.Name == "ModuleConstructor")
+                    if (t.Name == "ModuleInitializer")
                     {
                         typeName = t.FullName;
                         break;
@@ -98,18 +98,18 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 }
                 if (typeName == null)
                 {
-                    LogError(Errors.NoModuleConstructorTypeFound());
+                    LogError(Errors.NoModuleInitializerTypeFound());
                     return null;
                 }
             } else
             {
-                if (!ModuleConstructor.Contains("::"))
+                if (!ModuleInitializer.Contains("::"))
                 {
-                    LogError(Errors.InvalidFormatForModuleConstructor());
+                    LogError(Errors.InvalidFormatForModuleInitializer());
                     return null;
                 }
-                typeName = ModuleConstructor.Substring(0, ModuleConstructor.IndexOf("::"));
-                methodName = ModuleConstructor.Substring(typeName.Length + 2);
+                typeName = ModuleInitializer.Substring(0, ModuleInitializer.IndexOf("::"));
+                methodName = ModuleInitializer.Substring(typeName.Length + 2);
                 if (!module.Types.Contains(typeName))
                 {
                     LogError(Errors.TypeNameDoesNotExist(typeName));
@@ -126,13 +126,13 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             }
             if (callee.IsPrivate || callee.IsFamily)
             {
-                LogError(Errors.ModuleConstructorMayNotBePrivate());
+                LogError(Errors.ModuleInitializerMayNotBePrivate());
                 return null;
             }
             TypeReference voidRef = module.Import(typeof(void));
             if (!callee.ReturnType.ReturnType.Equals(voidRef))
             {
-                LogError(Errors.ModuleConstructorMustBeVoid());
+                LogError(Errors.ModuleInitializerMustBeVoid());
                 return null;
             }
             return callee;

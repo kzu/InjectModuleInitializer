@@ -51,10 +51,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                     task.AssemblyName = match.Groups[2].Value;
                     continue;
                 }
-                match = Regex.Match(arg, "^(/m:|/moduleconstructor:)(.+)", RegexOptions.IgnoreCase);
+                match = Regex.Match(arg, "^(/m:|/ModuleInitializer:)(.+)", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
-                    task.ModuleConstructor = match.Groups[2].Value;
+                    task.ModuleInitializer = match.Groups[2].Value;
                     continue;
                 }
                 Console.Error.WriteLine("ERROR: Invalid argument '{0}'. Type 'InjectModuleInitializer /? for help", arg);
