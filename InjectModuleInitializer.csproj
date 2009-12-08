@@ -62,7 +62,7 @@
   -->
   <PropertyGroup>
     <ILMerge>c:\Program Files\Microsoft\ILMerge\ILMerge.exe</ILMerge>
-    <KeyFileParameter Condition="Exists('$(ProjectDir)InjectModuleInitializer.pub')">/keyfile:&quot;$(ProjectDir)InjectModuleInitializer.pub&quot;</KeyFileParameter>
+    <KeyFileParameter Condition="Exists('P:\Keys\InjectModuleInitializer.pub')">/keyfile:&quot;P:\Keys\InjectModuleInitializer.pub&quot;</KeyFileParameter>
   </PropertyGroup>
   <Target Name="AfterBuild" Condition="Exists('$(ILMerge)')">
     <MakeDir Directories="$(TargetDir)\Merged" Condition="!Exists('$(TargetDir)\Merged')" />
