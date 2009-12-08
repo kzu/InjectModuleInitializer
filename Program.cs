@@ -5,7 +5,7 @@ MSBuild task and command line program to inject a module initializer
 into a .NET assembly
 
 Copyright (C) 2009 Einar Egilsson
-http://tech.einaregilsson.com/2009/12/07/module-initializers-in-csharp/
+http://tech.einaregilsson.com/2009/12/08/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ $Revision$
 $HeadURL$ 
 */
 using System;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
@@ -34,60 +33,59 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
-            Console.WriteLine("InjectModuleInitializer v" + Assembly.GetExecutingAssembly().GetName().Version);
-            Console.WriteLine("");
             var task = new InjectModuleInitializerImpl();
-            if (args.Length < 1 || args.Length > 2 || args[0] == "/?")
+            if (args.Length == 0 || args.Length > 2 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
             {
-                Help();
+                PrintHelp();
                 return 1;
             }
 
-            foreach (var arg in args)
+            Console.WriteLine("InjectModuleInitializer v1.0");
+            Console.WriteLine("");
+            
+            task.AssemblyName = args[args.Length - 1];
+            if (args.Length == 2)
             {
-                Match match = Regex.Match(arg, "^(/a:|/assembly:)(.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
+                var match = Regex.Match(args[0], "^(/m:|/ModuleInitializer:)(.+)", RegexOptions.IgnoreCase);
+                if (!match.Success)
                 {
-                    task.AssemblyName = match.Groups[2].Value;
-                    continue;
+                    Console.Error.WriteLine("ERROR: Invalid argument '{0}', type InjectModuleInitializer /? for help", args[0]);
+                    return 1;
                 }
-                match = Regex.Match(arg, "^(/m:|/ModuleInitializer:)(.+)", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    task.ModuleInitializer = match.Groups[2].Value;
-                    continue;
-                }
-                Console.Error.WriteLine("ERROR: Invalid argument '{0}'. Type 'InjectModuleInitializer /? for help", arg);
-                return 1;
+                task.ModuleInitializer = match.Groups[2].Value;
             }
                 
-            return task.Execute() ? 0 : 1;
+            int result = task.Execute() ? 0 : 1;
+            if (result == 0)
+            {
+                Console.WriteLine("Module Initializer successfully injected in assembly " + task.AssemblyName);
+            }
+            return result;
         }
-
-        static void Help()
+        
+        static void PrintHelp()
         {
-            Console.WriteLine("HELP");
+            Console.Error.WriteLine(@"
+InjectModuleInitializer.exe [/m:<method>] filename
+
+/m:<method>                   Specify the method to be run as the module  
+/moduleinitializer:<method>   initializer. Written as full name of containing
+                              type, followed by :: and then the method name,
+                              e.g. Namespace.ClassName::Method. Method is
+                              required to be a public or internal static
+                              method that takes no parameters and returns void.
+                              If this parameter is omitted the program will 
+                              look for a type name ModuleInitializer (in any
+                              namespace) and look for a method named Run in
+                              that type.
+
+/?                            Prints this help screen.
+
+Additional information about this program, including how to use it as
+a MSBuild task, can be found at the url:
+
+  http://tech.einaregilsson.com/2009/12/08/module-initializers-in-csharp
+");
         }
     }
 }
-
-
-//string assemblyName = args[0];
-//string[] parts = Regex.Split(args[1], "::");
-//string typeName = parts[0];
-//string methodName = parts[1];
-
-//AssemblyDefinition assembly = AssemblyFactory.GetAssembly (assemblyName); 
-//TypeReference voidRef = assembly.MainModule.Import(typeof(void));
-//var attributes = MethodAttributes.Static
-//                | MethodAttributes.SpecialName
-//                | MethodAttributes.RTSpecialName;
-//var cctor = new MethodDefinition( ".cctor", attributes, voidRef);
-
-//TypeDefinition type = assembly.MainModule.Types[typeName];
-//MethodReference methodRef = type.Methods.GetMethod(methodName,new Type[]{});
-//cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Call, methodRef));
-//cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Ret));
-//assembly.MainModule.Inject(cctor, assembly.MainModule.Types["<Module>"]);
-//AssemblyFactory.SaveAssembly(assembly, assemblyName);         
-
