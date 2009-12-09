@@ -34,7 +34,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     internal class InjectModuleInitializerImpl
     {
         public delegate void ErrorLogger(string msg, params object[] args);
-        public string AssemblyName { get; set; }
+        public string AssemblyFile { get; set; }
         public string ModuleInitializer { get; set; }
         public ErrorLogger LogError { get; set; }
 
@@ -46,12 +46,12 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 {
                     LogError = (msg, args) => Console.Error.WriteLine("ERROR: " + msg, args);
                 }
-                if (!File.Exists(AssemblyName))
+                if (!File.Exists(AssemblyFile))
                 {
-                    LogError(Errors.AssemblyDoesNotExist(AssemblyName));
+                    LogError(Errors.AssemblyDoesNotExist(AssemblyFile));
                     return false;
                 }
-                AssemblyDefinition assembly = AssemblyFactory.GetAssembly(AssemblyName);
+                AssemblyDefinition assembly = AssemblyFactory.GetAssembly(AssemblyFile);
 
                 MethodReference callee = GetCalleeMethod(assembly);
                 if (callee == null)
@@ -68,7 +68,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Call, callee));
                 cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Ret));
                 assembly.MainModule.Inject(cctor, assembly.MainModule.Types["<Module>"]);
-                AssemblyFactory.SaveAssembly(assembly, AssemblyName);
+                AssemblyFactory.SaveAssembly(assembly, AssemblyFile);
                 return true;
             }
             catch (Exception ex)

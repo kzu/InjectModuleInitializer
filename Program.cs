@@ -43,7 +43,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             Console.WriteLine("InjectModuleInitializer v1.0");
             Console.WriteLine("");
             
-            task.AssemblyName = args[args.Length - 1];
+            task.AssemblyFile = args[args.Length - 1];
             if (args.Length == 2)
             {
                 var match = Regex.Match(args[0], "^(/m:|/ModuleInitializer:)(.+)", RegexOptions.IgnoreCase);
@@ -58,7 +58,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             int result = task.Execute() ? 0 : 1;
             if (result == 0)
             {
-                Console.WriteLine("Module Initializer successfully injected in assembly " + task.AssemblyName);
+                Console.WriteLine("Module Initializer successfully injected in assembly " + task.AssemblyFile);
             }
             return result;
         }

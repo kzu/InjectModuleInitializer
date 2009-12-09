@@ -225,7 +225,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
                 }   
 
             ", false);
-            var injector = new InjectModuleInitializerImpl { AssemblyName = dll };
+            var injector = new InjectModuleInitializerImpl { AssemblyFile = dll };
             Assert.IsTrue(injector.Execute(), "Injection failed");
             Assembly ass = Assembly.Load(File.ReadAllBytes(dll));
             Type t = ass.GetType("Empty");
@@ -238,7 +238,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
         {
             string exe = CompileAssembly(source, true);
 
-            var injector = new InjectModuleInitializerImpl { AssemblyName = exe, ModuleInitializer = initializer };
+            var injector = new InjectModuleInitializerImpl { AssemblyFile = exe, ModuleInitializer = initializer };
             Assert.IsTrue(injector.Execute(), "Injection failed");
             var info = new ProcessStartInfo
             {
@@ -279,7 +279,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
             {
                 assemblyName = CompileAssembly(source, true);
             }
-            injector.AssemblyName = assemblyName;
+            injector.AssemblyFile = assemblyName;
             injector.Execute();
             Assert.Greater(logger.Messages.Count, 0, "No messages collected");
             Assert.AreEqual(expectedMessage, logger.Messages[0]);

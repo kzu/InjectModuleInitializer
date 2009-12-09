@@ -32,14 +32,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     public class InjectModuleInitializer : Task
     {
         [Required]
-        public string AssemblyName { get; set; }
+        public string AssemblyFile { get; set; }
         public string ModuleInitializer { get; set; }
         private readonly InjectModuleInitializerImpl impl = new InjectModuleInitializerImpl();
         
         public override bool Execute()
         {
             impl.LogError = Log.LogError;
-            impl.AssemblyName = AssemblyName;
+            impl.AssemblyFile = AssemblyFile;
             impl.ModuleInitializer = ModuleInitializer;
             return impl.Execute();
         }
