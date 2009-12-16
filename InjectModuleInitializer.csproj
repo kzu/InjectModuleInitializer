@@ -61,7 +61,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <ILMerge>c:\Program Files\Microsoft\ILMerge\ILMerge.exe</ILMerge>
+    <ILMerge>D:\PersonalData\bin\ILMerge.exe</ILMerge>
     <KeyFileParameter Condition="Exists('P:\Keys\InjectModuleInitializer.pub')">/keyfile:&quot;P:\Keys\InjectModuleInitializer.pub&quot;</KeyFileParameter>
   </PropertyGroup>
   <Target Name="AfterBuild" Condition="Exists('$(ILMerge)')">
