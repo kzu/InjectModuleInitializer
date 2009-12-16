@@ -5,7 +5,7 @@ MSBuild task and command line program to inject a module initializer
 into a .NET assembly
 
 Copyright (C) 2009 Einar Egilsson
-http://tech.einaregilsson.com/2009/12/08/module-initializers-in-csharp/
+http://tech.einaregilsson.com/2009/12/16/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
