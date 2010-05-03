@@ -25,9 +25,12 @@ $Revision$
 $HeadURL$ 
 */
 using System;
+using System.Diagnostics;
 using System.IO;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Pdb;
+using Mono.Collections.Generic;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
@@ -37,6 +40,18 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         public string AssemblyFile { get; set; }
         public string ModuleInitializer { get; set; }
         public ErrorLogger LogError { get; set; }
+        
+        private AssemblyDefinition Assembly { get; set; }
+
+        private string PdbFile
+        {
+            get
+            {
+                Debug.Assert(AssemblyFile != null);
+                return Path.ChangeExtension(AssemblyFile, ".pdb");
+            }
+        }
+
 
         public bool Execute()
         {
@@ -51,24 +66,19 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                     LogError(Errors.AssemblyDoesNotExist(AssemblyFile));
                     return false;
                 }
-                AssemblyDefinition assembly = AssemblyFactory.GetAssembly(AssemblyFile);
+                
+                ReadAssembly();
 
-                MethodReference callee = GetCalleeMethod(assembly);
+                MethodReference callee = GetCalleeMethod();
                 if (callee == null)
                 {
                     return false;
                 }
 
-                TypeReference voidRef = assembly.MainModule.Import(typeof(void));
-                const MethodAttributes attributes = MethodAttributes.Static
-                                                    | MethodAttributes.SpecialName
-                                                    | MethodAttributes.RTSpecialName;
-                var cctor = new MethodDefinition(".cctor", attributes, voidRef);
+                InjectInitializer(callee);
 
-                cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Call, callee));
-                cctor.Body.CilWorker.Append(cctor.Body.CilWorker.Create(OpCodes.Ret));
-                assembly.MainModule.Inject(cctor, assembly.MainModule.Types["<Module>"]);
-                AssemblyFactory.SaveAssembly(assembly, AssemblyFile);
+                WriteAssembly();
+
                 return true;
             }
             catch (Exception ex)
@@ -81,47 +91,86 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             }
         }
 
-        private MethodReference GetCalleeMethod(AssemblyDefinition assembly)
+        private void InjectInitializer(MethodReference callee)
         {
-            ModuleDefinition module = assembly.MainModule;
-            string typeName = null, methodName;
+            Debug.Assert(Assembly != null);
+            TypeReference voidRef = Assembly.MainModule.Import(typeof(void));
+            const MethodAttributes attributes = MethodAttributes.Static
+                                                | MethodAttributes.SpecialName
+                                                | MethodAttributes.RTSpecialName;
+            var cctor = new MethodDefinition(".cctor", attributes, voidRef);
+            ILProcessor il = cctor.Body.GetILProcessor();
+            il.Append(il.Create(OpCodes.Call, callee));
+            il.Append(il.Create(OpCodes.Ret));
+
+            TypeDefinition moduleClass = Find(Assembly.MainModule.Types, t => t.Name == "<Module>");
+            moduleClass.Methods.Add(cctor);
+
+            Debug.Assert(moduleClass != null, "Found no module class!");
+        }
+
+        private void WriteAssembly()
+        {
+            Debug.Assert(Assembly != null);
+            var writeParams = new WriterParameters();
+            if (PdbFile != null)
+            {
+                writeParams.WriteSymbols = true;
+                writeParams.SymbolWriterProvider = new PdbWriterProvider();
+            }
+            Assembly.Write(AssemblyFile, writeParams);
+        }
+
+        private void ReadAssembly()
+        {
+            Debug.Assert(Assembly == null);
+            var readParams = new ReaderParameters(ReadingMode.Immediate);
+            if (PdbFile != null)
+            {
+                readParams.ReadSymbols = true;
+                readParams.SymbolReaderProvider = new PdbReaderProvider();
+            }
+            Assembly = AssemblyDefinition.ReadAssembly(AssemblyFile, readParams);
+        }
+
+        private MethodReference GetCalleeMethod()
+        {
+            Debug.Assert(Assembly != null);
+            ModuleDefinition module = Assembly.MainModule;
+            string methodName;
+            TypeDefinition moduleInitializerClass;
             if (string.IsNullOrEmpty(ModuleInitializer))
             {
                 methodName = "Run";
-                foreach (TypeDefinition t in module.Types)
-                {
-                    if (t.Name == "ModuleInitializer")
-                    {
-                        typeName = t.FullName;
-                        break;
-                    }
-                }
-                if (typeName == null)
+                moduleInitializerClass = Find(module.Types, t => t.Name == "ModuleInitializer");
+                if (moduleInitializerClass == null)
                 {
                     LogError(Errors.NoModuleInitializerTypeFound());
                     return null;
                 }
-            } else
+            }
+            else
             {
                 if (!ModuleInitializer.Contains("::"))
                 {
                     LogError(Errors.InvalidFormatForModuleInitializer());
                     return null;
                 }
-                typeName = ModuleInitializer.Substring(0, ModuleInitializer.IndexOf("::"));
+                string typeName = ModuleInitializer.Substring(0, ModuleInitializer.IndexOf("::"));
                 methodName = ModuleInitializer.Substring(typeName.Length + 2);
-                if (!module.Types.Contains(typeName))
+                moduleInitializerClass = Find(module.Types, t => t.FullName == typeName);
+                if (moduleInitializerClass == null)
                 {
                     LogError(Errors.TypeNameDoesNotExist(typeName));
                     return null;
                 }
             }
 
-            TypeDefinition type = module.Types[typeName];
-            MethodDefinition callee = type.Methods.GetMethod(methodName, new Type[] { });
+            TypeReference voidRef = module.Import(typeof(void));
+            MethodDefinition callee = Find(moduleInitializerClass.Methods, m => m.Name == methodName && m.Parameters.Count == 0);
             if (callee == null)
             {
-                LogError(Errors.NoSuitableMethodFoundInType(methodName, typeName));
+                LogError(Errors.NoSuitableMethodFoundInType(methodName, moduleInitializerClass.FullName));
                 return null;
             }
             if (callee.IsPrivate || callee.IsFamily)
@@ -129,13 +178,25 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 LogError(Errors.ModuleInitializerMayNotBePrivate());
                 return null;
             }
-            TypeReference voidRef = module.Import(typeof(void));
-            if (!callee.ReturnType.ReturnType.Equals(voidRef))
+            if (!callee.ReturnType.FullName.Equals(voidRef.FullName)) //Comparing the objects themselves doesn't work as of Mono.Cecil 0.9 for some reason...
             {
                 LogError(Errors.ModuleInitializerMustBeVoid());
                 return null;
             }
             return callee;
+        }
+
+        //No LINQ, since we want to target 2.0
+        private static T Find<T>(Collection<T> objects, Predicate<T> condition) where T:class
+        {
+            foreach (T obj in objects)
+            {
+                if (condition(obj))
+                {
+                    return obj;
+                }
+            }
+            return null;
         }
     }
 }

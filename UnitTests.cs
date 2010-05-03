@@ -262,6 +262,8 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
             var csc = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v3.5" } });
             var parameters = new CompilerParameters(new[] { "mscorlib.dll", "System.Core.dll" }, filename, false);
             parameters.GenerateExecutable = isExe;
+            parameters.CompilerOptions = "/debug";
+            parameters.IncludeDebugInformation = true;
             CompilerResults results = csc.CompileAssemblyFromSource(parameters, source);
             Assert.AreEqual(0, results.Errors.Count, "Invalid source code passed");
             return filename;
