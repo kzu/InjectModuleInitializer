@@ -40,7 +40,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 return 1;
             }
 
-            Console.WriteLine("InjectModuleInitializer v1.0");
+            Console.WriteLine("InjectModuleInitializer v1.1");
             Console.WriteLine("");
             
             task.AssemblyFile = args[args.Length - 1];
