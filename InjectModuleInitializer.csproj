@@ -65,11 +65,11 @@
   </Target>
   -->
   <PropertyGroup>
-    <ILMerge>D:\PersonalData\bin\ILMerge.exe</ILMerge>
-    <KeyFileParameter Condition="Exists('P:\Keys\InjectModuleInitializer.pub')">/keyfile:"P:\Keys\InjectModuleInitializer.pub"</KeyFileParameter>
+    <ILMerge>$(BIN)\ILMerge.exe</ILMerge>
+    <KeyFileParameter Condition="Exists('$(SigningKeys)\InjectModuleInitializer.pub')">/keyfile:"$(SigningKeys)\InjectModuleInitializer.pub"</KeyFileParameter>
   </PropertyGroup>
   <Target Name="AfterBuild" Condition="Exists('$(ILMerge)')">
     <MakeDir Directories="$(TargetDir)\Merged" Condition="!Exists('$(TargetDir)\Merged')" />
-    <Exec Command="&quot;$(ILMerge)&quot; /t:exe /v2 $(KeyFileParameter) /out:&quot;$(TargetDir)Merged\InjectModuleInitializer.exe&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Mono.Cecil.dll&quot;" />
+    <Exec Command="&quot;$(ILMerge)&quot; /t:exe /v2 $(KeyFileParameter) /out:&quot;$(TargetDir)Merged\InjectModuleInitializer.exe&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Mono.Cecil.dll&quot; &quot;$(TargetDir)Mono.Cecil.Pdb.dll&quot;" />
   </Target>
 </Project>
