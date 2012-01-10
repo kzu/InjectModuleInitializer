@@ -29,6 +29,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
+#if DEBUG
+            //I only have VS Express at home and this is the easiest way to debug
+            //the unit tests since there's no test runner and I can't attach to NUnit.
+            if (args.Length == 1 && args[0] == "/runtests")
+            {
+                return TestRunner.RunTests();
+            }
+#endif
             var task = new Injector();
             if (args.Length == 0 || args.Length > 2 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
             {
@@ -83,5 +91,6 @@ a MSBuild task, can be found at the url:
   http://einaregilsson.com/2009/12/16/module-initializers-in-csharp
 ");
         }
+
     }
 }

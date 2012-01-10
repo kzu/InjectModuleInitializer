@@ -29,7 +29,7 @@ using System.Threading;
 using NUnit.Framework;
 
 #if DEBUG
-namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
+namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
 
     [TestFixture]
