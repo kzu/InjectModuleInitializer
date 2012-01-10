@@ -36,7 +36,28 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         public string AssemblyFile { get; set; }
         public string ModuleInitializer { get; set; }
         public ErrorLogger LogError { get; set; }
-        
+
+        static Injector()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += LoadEmbeddedAssembly;
+        }
+
+        static System.Reflection.Assembly LoadEmbeddedAssembly(object sender, ResolveEventArgs args)
+        {
+            string name = args.Name.Substring(0, args.Name.IndexOf(','));
+            string resourceName = typeof(Injector).Namespace + ".lib." + name + ".dll";
+            Stream stream = typeof(Injector).Assembly.GetManifestResourceStream(resourceName);
+            if (stream == null) {
+                return null;
+            }
+            using (stream) {
+                byte[] buf = new byte[stream.Length];
+                stream.Read(buf,0, buf.Length);
+                return System.Reflection.Assembly.Load(buf);
+            }
+        }
+
+
         private AssemblyDefinition Assembly { get; set; }
 
         private string PdbFile

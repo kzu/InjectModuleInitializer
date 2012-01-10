@@ -47,6 +47,7 @@
     <WarningLevel>4</WarningLevel>
     <NoWarn>1685</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -64,10 +65,12 @@
     <Reference Include="Mono.Cecil, Version=0.9.1.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.9.1.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -102,18 +105,17 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="lib\Mono.Cecil.dll" />
+    <EmbeddedResource Include="lib\Mono.Cecil.Pdb.dll" />
+    <Content Include="lib\nunit.framework.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  -->
-  <PropertyGroup>
-    <ILMerge>$(BIN)\ILMerge.exe</ILMerge>
-    <KeyFileParameter Condition="Exists('$(SigningKeys)\InjectModuleInitializer.pub')">/keyfile:"$(SigningKeys)\InjectModuleInitializer.pub"</KeyFileParameter>
-  </PropertyGroup>
   <Target Name="AfterBuild" Condition="Exists('$(ILMerge)')">
-    <MakeDir Directories="$(TargetDir)\Merged" Condition="!Exists('$(TargetDir)\Merged')" />
-    <Exec Command="&quot;$(ILMerge)&quot; /t:exe /v2 $(KeyFileParameter) /out:&quot;$(TargetDir)Merged\InjectModuleInitializer.exe&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)Mono.Cecil.dll&quot; &quot;$(TargetDir)Mono.Cecil.Pdb.dll&quot;" />
   </Target>
+ -->
 </Project>
