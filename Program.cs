@@ -5,7 +5,7 @@ MSBuild task and command line program to inject a module initializer
 into a .NET assembly
 
 Copyright (C) 2009 Einar Egilsson
-http://tech.einaregilsson.com/2009/12/16/module-initializers-in-csharp/
+http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,10 +19,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-$Author$
-$Revision$
-$HeadURL$ 
 */
 using System;
 using System.Text.RegularExpressions;
@@ -33,7 +29,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
-            var task = new InjectModuleInitializerImpl();
+            var task = new Injector();
             if (args.Length == 0 || args.Length > 2 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
             {
                 PrintHelp();
@@ -84,7 +80,7 @@ InjectModuleInitializer.exe [/m:<method>] filename
 Additional information about this program, including how to use it as
 a MSBuild task, can be found at the url:
 
-  http://tech.einaregilsson.com/2009/12/16/module-initializers-in-csharp
+  http://einaregilsson.com/2009/12/16/module-initializers-in-csharp
 ");
         }
     }

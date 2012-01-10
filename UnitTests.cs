@@ -5,7 +5,7 @@ MSBuild task and command line program to inject a module initializer
 into a .NET assembly
 
 Copyright (C) 2009 Einar Egilsson
-http://tech.einaregilsson.com/2009/12/16/module-initializers-in-csharp/
+http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,19 +19,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-$Author$
-$Revision$
-$HeadURL$ 
 */
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using Microsoft.CSharp;
 using NUnit.Framework;
 
 #if DEBUG
@@ -215,7 +209,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
         {
             string dll = CompileAssembly(@"
                 public class Empty {
-                    public static string NeverSet {get; set;}
+                    public static string NeverSet;
                 }
 
                 public class ModuleInitializer {
@@ -225,20 +219,20 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
                 }   
 
             ", false);
-            var injector = new InjectModuleInitializerImpl { AssemblyFile = dll };
+            var injector = new Injector { AssemblyFile = dll };
             Assert.IsTrue(injector.Execute(), "Injection failed");
             Assembly ass = Assembly.Load(File.ReadAllBytes(dll));
             Type t = ass.GetType("Empty");
-            string value = (string)t.GetProperty("NeverSet").GetGetMethod().Invoke(null, null);
+            string value = (string) t.GetField("NeverSet").GetValue(null);
             Assert.AreEqual("SetByModuleInitializer", value);
             File.Delete(dll);
         }
 
-        private static void TestExe(string source, string initializer)
+        private void TestExe(string source, string initializer)
         {
             string exe = CompileAssembly(source, true);
 
-            var injector = new InjectModuleInitializerImpl { AssemblyFile = exe, ModuleInitializer = initializer };
+            var injector = new Injector { AssemblyFile = exe, ModuleInitializer = initializer };
             Assert.IsTrue(injector.Execute(), "Injection failed");
             var info = new ProcessStartInfo
             {
@@ -256,25 +250,36 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
             File.Delete(exe);
         }
 
-        private static string CompileAssembly(string source, bool isExe)
+        protected virtual string Compiler
+        {
+            get { return @"C:\Windows\Microsoft.NET\Framework\v3.5\csc.exe"; }
+        }
+
+        private string CompileAssembly(string source, bool isExe)
         {
             string filename = Path.GetTempFileName() + (isExe ? ".exe" : ".dll");
-            var csc = new CSharpCodeProvider(new Dictionary<string, string> { { "CompilerVersion", "v3.5" } });
-            var parameters = new CompilerParameters(new[] { "mscorlib.dll", "System.Core.dll" }, filename, false);
-            parameters.GenerateExecutable = isExe;
-            parameters.CompilerOptions = "/debug";
-            parameters.IncludeDebugInformation = true;
-            CompilerResults results = csc.CompileAssemblyFromSource(parameters, source);
-            Assert.AreEqual(0, results.Errors.Count, "Invalid source code passed");
+            string target = isExe ? "exe" : "library";
+            string sourceFile = Path.GetTempFileName() + ".cs";
+            File.WriteAllText(sourceFile, source);
+            var info = new ProcessStartInfo
+            {
+                FileName = Compiler,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                Arguments = string.Format("/out:\"{0}\" /t:{1} /debug /reference:mscorlib.dll \"{2}\"", filename, target,sourceFile)
+            };
+            Process p = Process.Start(info);
+            p.WaitForExit();
+            Assert.AreEqual(0, p.ExitCode, "Invalid source code passed");
             return filename;
         }
 
-        private static void ExpectFailure(string expectedMessage, string assemblyName, string moduleInitializer, string source)
+        private void ExpectFailure(string expectedMessage, string assemblyName, string moduleInitializer, string source)
         {
             Assert.IsTrue(assemblyName == null || source == null,
                           "Either source or assembly name should be passed as null");
             LogMessageCollector logger = new LogMessageCollector();
-            var injector = new InjectModuleInitializerImpl();
+            var injector = new Injector();
             injector.LogError = logger.Log;
             injector.ModuleInitializer = moduleInitializer;
             if (string.IsNullOrEmpty(assemblyName))
@@ -291,5 +296,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Tests
             }
         }
     }
+
+    public class InjectModuleInitializerTest_4_0 : InjectModuleInitializerTest
+    {
+        protected override string Compiler
+        {
+            get { return @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"; }
+        }
+    }
+
 }
 #endif

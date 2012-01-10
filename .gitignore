@@ -1,0 +1,9 @@
+bin
+bin/* 
+_ReSharper.InjectModuleInitializer/*
+obj
+*.user
+*.suo
+
+
+
