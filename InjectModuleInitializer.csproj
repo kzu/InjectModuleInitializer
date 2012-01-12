@@ -85,6 +85,9 @@
     <Compile Include="Injector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="TestData\test.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="TestRunner.cs" />
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
@@ -112,7 +115,9 @@
     <Content Include="lib\nunit.framework.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="EinarEgilssonStrongName.snk" />
+    <None Include="TestData\test.build">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

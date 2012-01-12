@@ -88,7 +88,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                     LogError(Errors.AssemblyDoesNotExist(AssemblyFile));
                     return false;
                 }
-                
                 ReadAssembly();
 
                 MethodReference callee = GetCalleeMethod();
@@ -105,10 +104,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             }
             catch (Exception ex)
             {
-                if (LogError != null)
-                {
-                    LogError(ex.Message);
-                }
+                LogError(ex.Message);
                 return false;
             }
         }
