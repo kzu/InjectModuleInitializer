@@ -4,7 +4,7 @@ InjectModuleInitializer
 MSBuild task and command line program to inject a module initializer
 into a .NET assembly
 
-Copyright (C) 2009 Einar Egilsson
+Copyright (C) 2009-2012 Einar Egilsson
 http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Einar Egilsson")]
 [assembly: AssemblyProduct("InjectModuleInitializer")]
-[assembly: AssemblyCopyright("Copyright © Einar Egilsson 2009")]
+[assembly: AssemblyCopyright("Copyright © Einar Egilsson 2009-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -53,5 +53,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]

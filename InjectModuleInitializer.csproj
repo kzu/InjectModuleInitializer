@@ -13,9 +13,8 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>EinarEgilsson.Utilities.InjectModuleInitializer.Program</StartupObject>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <SignAssembly Condition="Exists('$(PrivateKeys)\EinarEgilssonStrongName.snk')">true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="Exists('$(PrivateKeys)\EinarEgilssonStrongName.snk')">$(PrivateKeys)\EinarEgilssonStrongName.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -107,16 +106,20 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="license.txt" />
     <EmbeddedResource Include="lib\Mono.Cecil.dll" />
     <EmbeddedResource Include="lib\Mono.Cecil.Pdb.dll" />
     <Content Include="lib\nunit.framework.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EinarEgilssonStrongName.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild" Condition="Exists('$(ILMerge)')">
+  <Target Name="AfterBuild">
   </Target>
  -->
 </Project>
