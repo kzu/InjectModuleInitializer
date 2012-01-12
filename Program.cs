@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 using System;
 using System.Text.RegularExpressions;
+using EinarEgilsson.Utilities.InjectModuleInitializer.Test;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
@@ -29,6 +30,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
+            Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().FullName);
 #if DEBUG
             //I only have VS Express at home and this is the easiest way to debug
             //the unit tests since there's no test runner and I can't attach to NUnit.

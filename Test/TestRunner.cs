@@ -26,7 +26,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace EinarEgilsson.Utilities.InjectModuleInitializer
+namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
 {
 #if DEBUG
     public static class TestRunner

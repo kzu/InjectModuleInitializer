@@ -85,11 +85,11 @@
     <Compile Include="Injector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="TestData\test.cs">
+    <Content Include="Test\Data\test.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="TestRunner.cs" />
-    <Compile Include="UnitTests.cs" />
+    <Compile Include="Test\TestRunner.cs" />
+    <Compile Include="Test\UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -115,7 +115,7 @@
     <Content Include="lib\nunit.framework.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestData\test.build">
+    <None Include="Test\Data\test.build">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
