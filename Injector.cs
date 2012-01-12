@@ -200,6 +200,11 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 LogError(Errors.ModuleInitializerMustBeVoid());
                 return null;
             }
+            if (!callee.IsStatic)
+            {
+                LogError(Errors.ModuleInitializerMustBeStatic());
+                return null;
+            }
             return callee;
         }
 

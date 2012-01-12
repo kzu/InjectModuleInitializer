@@ -178,6 +178,29 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         }
 
         [Test]
+        public void TestModuleInitializerMustBeStatic()
+        {
+            ExpectFailure(Errors.ModuleInitializerMustBeStatic(), null, "Foo.Bar::Baz",
+            @"
+            namespace Foo {
+                class Bar {
+                    static void Main(){}
+                    public void Baz(){}
+                }
+            }
+            ");
+            ExpectFailure(Errors.ModuleInitializerMustBeStatic(), null, null,
+            @"
+            namespace Foo {
+                class ModuleInitializer {
+                    static void Main(){}
+                    public void Run(){}
+                }
+            }
+            ");
+        }
+
+        [Test]
         public void TestExeExplicitInitializer()
         {
             TestExe(@"

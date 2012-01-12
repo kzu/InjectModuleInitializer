@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
@@ -47,10 +48,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                             WriteColored("\r    " + method.Name, ConsoleColor.Green);
                             success++;
                         }
-                        catch (Exception ex)
+                        catch (TargetInvocationException ex)
                         {
                             WriteColored("\r    " + method.Name, ConsoleColor.Red);
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine(ex.InnerException.Message);
                             fail++;
                         }
                     }

@@ -53,12 +53,17 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         
         public static string ModuleInitializerMayNotBePrivate()
         {
-            return "Module initializer may not be private or protected, use public or internal instead";
+            return "Module initializer method may not be private or protected, use public or internal instead";
         }
         
         public static string ModuleInitializerMustBeVoid()
         {
-            return "Module initializer must have 'void' as return type";
+            return "Module initializer method must have 'void' as return type";
+        }
+
+        public static string ModuleInitializerMustBeStatic()
+        {
+            return "Module initializer method must be static";
         }
     }
 }
