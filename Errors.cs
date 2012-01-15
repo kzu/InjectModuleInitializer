@@ -26,42 +26,52 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
     internal static class Errors
     {
-        public static string AssemblyDoesNotExist(string assembly)
+        internal static string AssemblyDoesNotExist(string assembly)
         {
             return String.Format("Assembly '{0}' does not exist", assembly);
         }
 
-        public static string NoModuleInitializerTypeFound()
+        internal static string NoModuleInitializerTypeFound()
         {
             return "Found no type named 'ModuleInitializer', this type must exist or the ModuleInitializer parameter must be used";
         }
 
-        public static string InvalidFormatForModuleInitializer()
+        internal static string InvalidFormatForModuleInitializer()
         {
             return "Invalid format for ModuleInitializer parameter, use Full.Type.Name::MethodName";
         }
         
-        public static string TypeNameDoesNotExist(string typeName)
+        internal static string TypeNameDoesNotExist(string typeName)
         {
             return string.Format("No type named '{0}' exists in the given assembly!", typeName);
         }
-        
-        public static string NoSuitableMethodFoundInType(string methodName, string typeName)
+
+        internal static string MethodNameDoesNotExist(string typeName, string methodName)
         {
-            return string.Format("No suitable method named '{0}' found in type '{1}'", methodName, typeName);
+            return string.Format("No method named '{0}' exists in the type '{0}'", methodName, typeName);
+        }
+
+        internal static string KeyFileDoesNotExist(string keyfile)
+        {
+            return string.Format("The key file'{0}' does not exist", keyfile);
         }
         
-        public static string ModuleInitializerMayNotBePrivate()
+        internal static string ModuleInitializerMayNotBePrivate()
         {
             return "Module initializer method may not be private or protected, use public or internal instead";
         }
         
-        public static string ModuleInitializerMustBeVoid()
+        internal static string ModuleInitializerMustBeVoid()
         {
             return "Module initializer method must have 'void' as return type";
         }
 
-        public static string ModuleInitializerMustBeStatic()
+        internal static string ModuleInitializerMayNotHaveParameters()
+        {
+            return "Module initializer method must not have any parameters";
+        }
+
+        internal static string ModuleInitializerMustBeStatic()
         {
             return "Module initializer method must be static";
         }

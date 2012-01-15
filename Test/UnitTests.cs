@@ -36,295 +36,195 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
     public class InjectModuleInitializerTest
     {
 
-        class LogMessageCollector
-        {
-            public readonly List<string> Messages = new List<string>();
-            public void Log(string msg, params object[] args)
-            {
-                Messages.Add(string.Format(msg, args));
-            }
-        }
-
         [Test]
-        public void TestAssemblyDoesNotExist()
+        public void AssemblyDoesNotExist()
         {
             const string name = "thiswontexist.no.it.doesnt";
-            ExpectFailure(Errors.AssemblyDoesNotExist(name), name, null, null);
+            try
+            {
+                new Injector().Inject(name);
+                Assert.Fail();
+            }
+            catch (InjectionException ex)
+            {
+                Assert.AreEqual(Errors.AssemblyDoesNotExist(name), ex.Message);
+            }
         }
 
         [Test]
-        public void TestNoModuleInitializerTypeFound()
+        public void KeyFileDoesNotExist()
         {
-            ExpectFailure(Errors.NoModuleInitializerTypeFound(), null, null,
-                @"
-            namespace Foo.Bar {
-                class Baz {
-                    static void Main(){}
-                }
+            string keyfile = "notexist";
+            try
+            {
+                new Injector().Inject(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath, null, keyfile);
+                Assert.Fail();
             }
-");
+            catch (InjectionException ex)
+            {
+                Assert.AreEqual(Errors.KeyFileDoesNotExist(keyfile), ex.Message);
+            }
         }
 
         [Test]
-        public void TestInvalidFormatForModuleInitializer()
+        public void NoModuleInitializerTypeFound()
         {
-            ExpectFailure(Errors.InvalidFormatForModuleInitializer(), null, "foo.foo.no.method",
-            @"
-            namespace Foo.Bar {
-                class Baz {
-                    static void Main(){}
-                }
-            }
-            ");
+            BuildAndFailInject(Errors.NoModuleInitializerTypeFound(), "NoModuleInitializerTypeFound", codefile:"NoModuleInitializerTypeFound.cs");
         }
 
         [Test]
-        public void TestTypeNameDoesNotExist()
+        public void InvalidFormatForModuleInitializer()
         {
-            ExpectFailure(Errors.TypeNameDoesNotExist("Foo.Bar.NotExist"), null, "Foo.Bar.NotExist::Run",
-            @"
-            namespace Foo.Bar {
-                class Baz {
-                    static void Main(){}
-                }
-            }
-            ");
+            BuildAndFailInject(Errors.InvalidFormatForModuleInitializer(), "InvalidFormatForModuleInitializer", "foo.foo.no.method");
         }
 
         [Test]
-        public void TestNoSuitableMethodFoundInType()
+        public void TypeNameDoesNotExist()
         {
-            ExpectFailure(Errors.NoSuitableMethodFoundInType("Baz", "Foo.Bar"), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                    public static void Baz(int x){}
-                }
-            }
-            ");
-            ExpectFailure(Errors.NoSuitableMethodFoundInType("Baz", "Foo.Bar"), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                }
-            }
-            ");
+            const string type = "Does.Not.Exist";
+            BuildAndFailInject(Errors.TypeNameDoesNotExist(type), "TypeNameDoesNotExist", type+"::Method");
         }
 
         [Test]
-        public void TestModuleInitializerMayNotBePrivate()
+        public void MethodNameDoesNotExist()
         {
-            ExpectFailure(Errors.ModuleInitializerMayNotBePrivate(), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                    private static void Baz(){}
-                }
-            }
-            ");
-            ExpectFailure(Errors.ModuleInitializerMayNotBePrivate(), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                    protected static void Baz(){}
-                }
-            }
-            ");
-            ExpectFailure(Errors.ModuleInitializerMayNotBePrivate(), null, null,
-            @"
-            namespace Foo {
-                class ModuleInitializer {
-                    static void Main(){}
-                    protected static void Run(){}
-                }
-            }
-            ");
-            ExpectFailure(Errors.ModuleInitializerMayNotBePrivate(), null, null,
-            @"
-            namespace Foo {
-                class ModuleInitializer {
-                    static void Main(){}
-                    private static void Run(){}
-                }
-            }
-            ");
+            const string type = "ModuleInitializer";
+            const string method = "NotExist";
+            BuildAndFailInject(Errors.MethodNameDoesNotExist(type, method), "MethodNameDoesNotExist", type + "::" + method);
         }
 
         [Test]
-        public void TestModuleInitializerMustBeVoid()
+        public void InitializerMethodMayNotBePrivate()
         {
-            ExpectFailure(Errors.ModuleInitializerMustBeVoid(), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                    public static int Baz(){return 0;}
-                }
-            }
-            ");
-            ExpectFailure(Errors.ModuleInitializerMustBeVoid(), null, null,
-            @"
-            namespace Foo {
-                class ModuleInitializer {
-                    static void Main(){}
-                    public static int Run(){return 0;}
-                }
-            }
-            ");
+            BuildAndFailInject(Errors.ModuleInitializerMayNotBePrivate(), "InitializerMethodMayNotBePrivate", "ModuleInitializer::Private");
         }
 
         [Test]
-        public void TestModuleInitializerMustBeStatic()
+        public void InitializerMethodMayNotBeProtected()
         {
-            ExpectFailure(Errors.ModuleInitializerMustBeStatic(), null, "Foo.Bar::Baz",
-            @"
-            namespace Foo {
-                class Bar {
-                    static void Main(){}
-                    public void Baz(){}
-                }
-            }
-            ");
-            ExpectFailure(Errors.ModuleInitializerMustBeStatic(), null, null,
-            @"
-            namespace Foo {
-                class ModuleInitializer {
-                    static void Main(){}
-                    public void Run(){}
-                }
-            }
-            ");
+            BuildAndFailInject(Errors.ModuleInitializerMayNotBePrivate(), "InitializerMethodMayNotBeProtected", "ModuleInitializer::Protected");
         }
 
         [Test]
-        public void TestExeExplicitInitializer()
+        public void InitializerMethodMustBeStatic()
         {
-            TestExe(@"
-            class Program {
-                static void Main(){ System.Console.Write(""<MainMethod>""); }
-                public static void Initializer() {System.Console.Write(""<ModuleInitializer>"");}
-            }
-            ", "Program::Initializer");
+            BuildAndFailInject(Errors.ModuleInitializerMustBeStatic(), "InitializerMethodMustBeStatic", "ModuleInitializer::NotStatic");
         }
 
         [Test]
-        public void TestExeImplicitInitializer()
+        public void InitializerMethodMustBeVoid()
         {
-            TestExe(@"
-            class Program {
-                static void Main(){ System.Console.Write(""<MainMethod>""); }
-            }
-
-            namespace Foo.Bar {
-                class ModuleInitializer {
-                    public static void Run() {System.Console.Write(""<ModuleInitializer>"");}
-                }
-            }
-            ", null);
+            BuildAndFailInject(Errors.ModuleInitializerMustBeVoid(), "InitializerMethodMustBeVoid", "ModuleInitializer::NotVoid");
         }
 
         [Test]
-        public void TestDllSuccess()
+        public void InitializerMethodMayNotHaveParameters()
         {
-            string dll = CompileAssembly(@"
-                public class Empty {
-                    public static string NeverSet;
-                }
-
-                public class ModuleInitializer {
-                    public static void Run() {
-                        Empty.NeverSet = ""SetByModuleInitializer"";
-                    }
-                }   
-
-            ", false);
-            var injector = new Injector { AssemblyFile = dll };
-            Assert.IsTrue(injector.Execute(), "Injection failed");
-            Assembly ass = Assembly.Load(File.ReadAllBytes(dll));
-            Type t = ass.GetType("Empty");
-            string value = (string) t.GetField("NeverSet").GetValue(null);
-            Assert.AreEqual("SetByModuleInitializer", value);
-            File.Delete(dll);
+            BuildAndFailInject(Errors.ModuleInitializerMayNotHaveParameters(), "InitializerMethodMayNotHaveParameters", "ModuleInitializer::Parameters");
+        }
+      
+        private void BuildAndFailInject(string errorMsg, string assemblyName, string moduleInitializer = null, string keyfile = null, string codefile = "test.cs")
+        {
+            var result = Build(assemblyName, codefile);
+            Assert.AreEqual(0, result.Result);
+            try
+            {
+                new Injector().Inject(string.Format(@"Test\Data\{0}.exe",assemblyName) , moduleInitializer, keyfile);
+                Assert.Fail("Should have thrown exception");
+            }
+            catch (InjectionException ex)
+            {
+                Assert.AreEqual(errorMsg, ex.Message);
+            }
         }
 
-        private void TestExe(string source, string initializer)
+        [Test]
+        public void ExeExplicitInitializer()
         {
-            string exe = CompileAssembly(source, true);
+            var result = Build("ExeExplicitInitializer");
+            Assert.AreEqual(0, result.Result);
+        }
 
-            var injector = new Injector { AssemblyFile = exe, ModuleInitializer = initializer };
-            Assert.IsTrue(injector.Execute(), "Injection failed");
+//        [Test]
+//        public void TestExeImplicitInitializer()
+//        {
+//            TestExe(@"
+//            class Program {
+//                static void Main(){ System.Console.Write(""<MainMethod>""); }
+//            }
+//
+//            namespace Foo.Bar {
+//                class ModuleInitializer {
+//                    public static void Run() {System.Console.Write(""<ModuleInitializer>"");}
+//                }
+//            }
+//            ", null);
+//        }
+
+//        [Test]
+//        public void TestDllSuccess()
+//        {
+//            string dll = CompileAssembly(@"
+//                public class Empty {
+//                    public static string NeverSet;
+//                }
+//
+//                public class ModuleInitializer {
+//                    public static void Run() {
+//                        Empty.NeverSet = ""SetByModuleInitializer"";
+//                    }
+//                }   
+//
+//            ", false);
+//            var injector = new Injector();
+//            injector.Inject(dll, null);
+//            Assembly ass = Assembly.Load(File.ReadAllBytes(dll));
+//            Type t = ass.GetType("Empty");
+//            string value = (string)t.GetField("NeverSet").GetValue(null);
+//            Assert.AreEqual("SetByModuleInitializer", value);
+//            File.Delete(dll);
+//        }
+
+        protected virtual string MSBuild
+        {
+            get { return @"C:\Windows\Microsoft.NET\Framework\v3.5\msbuild.exe"; }
+        }
+
+        private class ExecResult
+        {
+            public int Result { get; set; }
+            public string StdOut { get; set; }
+            public string StdErr { get; set; }
+        }
+
+        private ExecResult Exec(string program, string args)
+        {
             var info = new ProcessStartInfo
             {
-                RedirectStandardOutput = true,
-                FileName = exe,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            var proc = Process.Start(info);
-            Assert.IsNotNull(proc);
-            string output = proc.StandardOutput.ReadToEnd();
-            Assert.AreEqual("<ModuleInitializer><MainMethod>", output);
-            proc.WaitForExit();
-            Thread.Sleep(200);
-            File.Delete(exe);
-        }
-
-        protected virtual string Compiler
-        {
-            get { return @"C:\Windows\Microsoft.NET\Framework\v3.5\csc.exe"; }
-        }
-
-        private string CompileAssembly(string source, bool isExe)
-        {
-            string filename = Path.GetTempFileName() + (isExe ? ".exe" : ".dll");
-            string target = isExe ? "exe" : "library";
-            string sourceFile = Path.GetTempFileName() + ".cs";
-            File.WriteAllText(sourceFile, source);
-            var info = new ProcessStartInfo
-            {
-                FileName = Compiler,
+                FileName = program,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                Arguments = string.Format("/out:\"{0}\" /t:{1} /debug /reference:mscorlib.dll \"{2}\"", filename, target,sourceFile)
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                Arguments = args
             };
             Process p = Process.Start(info);
             p.WaitForExit();
-            Assert.AreEqual(0, p.ExitCode, "Invalid source code passed");
-            return filename;
+            return new ExecResult { Result = p.ExitCode, StdErr = p.StandardError.ReadToEnd(), StdOut = p.StandardOutput.ReadToEnd() };
         }
 
-        private void ExpectFailure(string expectedMessage, string assemblyName, string moduleInitializer, string source)
+        private ExecResult Build(string outputName, string codefile="test.cs")
         {
-            Assert.IsTrue(assemblyName == null || source == null,
-                          "Either source or assembly name should be passed as null");
-            LogMessageCollector logger = new LogMessageCollector();
-            var injector = new Injector();
-            injector.LogError = logger.Log;
-            injector.ModuleInitializer = moduleInitializer;
-            if (string.IsNullOrEmpty(assemblyName))
-            {
-                assemblyName = CompileAssembly(source, true);
-            }
-            injector.AssemblyFile = assemblyName;
-            injector.Execute();
-            Assert.Greater(logger.Messages.Count, 0, "No messages collected");
-            Assert.AreEqual(expectedMessage, logger.Messages[0]);
-            if (File.Exists(assemblyName))
-            {
-                File.Delete(assemblyName);
-            }
+            return Exec(MSBuild, string.Format(@"/p:AssemblyName={0};CodeFile={1} Test\Data\test.build", outputName, codefile));
         }
+
     }
 
     public class InjectModuleInitializerTest_4_0 : InjectModuleInitializerTest
     {
-        protected override string Compiler
+        protected override string MSBuild
         {
-            get { return @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"; }
+            get { return @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"; }
         }
     }
 

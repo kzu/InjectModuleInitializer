@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="InjectModuleInitializer" AssemblyFile="..\..\InjectModuleInitializer.exe" />
   <PropertyGroup>
-    <AssemblyName>TestOut</AssemblyName>
+    <AssemblyName>$(AssemblyName)</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>Program</StartupObject>
@@ -14,7 +14,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(CodeFile).cs" />
+    <Compile Include="$(CodeFile)" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 	<Target Name="AfterBuild" Condition="'$(Inject)'=='1'">

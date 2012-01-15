@@ -30,7 +30,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
-            Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().FullName);
 #if DEBUG
             //I only have VS Express at home and this is the easiest way to debug
             //the unit tests since there's no test runner and I can't attach to NUnit.
@@ -39,8 +38,8 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 return TestRunner.RunTests();
             }
 #endif
-            var task = new Injector();
-            if (args.Length == 0 || args.Length > 2 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
+            var injector = new Injector();
+            if (args.Length == 0 || args.Length > 3 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
             {
                 PrintHelp();
                 return 1;
@@ -49,30 +48,45 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             Console.WriteLine("InjectModuleInitializer v1.2");
             Console.WriteLine("");
             
-            task.AssemblyFile = args[args.Length - 1];
-            if (args.Length == 2)
+            string assemblyFile, moduleInitializer=null, keyfile=null;
+            assemblyFile = args[args.Length - 1];
+
+            for (int i = 0; i < args.Length - 1; i++)
             {
-                var match = Regex.Match(args[0], "^(/m:|/ModuleInitializer:)(.+)", RegexOptions.IgnoreCase);
-                if (!match.Success)
+                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer:)?(.+)", RegexOptions.IgnoreCase);
+                if (initMatch.Success)
+                {
+                    moduleInitializer = initMatch.Groups[2].Value;
+                }
+                var keyMatch = Regex.Match(args[0], "^/k(eyfile)?:(.+)", RegexOptions.IgnoreCase);
+                if (keyMatch.Success)
+                {
+                    keyfile = keyMatch.Groups[2].Value;
+                }
+                if (!initMatch.Success && !keyMatch.Success)
                 {
                     Console.Error.WriteLine("ERROR: Invalid argument '{0}', type InjectModuleInitializer /? for help", args[0]);
                     return 1;
                 }
-                task.ModuleInitializer = match.Groups[2].Value;
             }
-                
-            int result = task.Execute() ? 0 : 1;
-            if (result == 0)
+
+            try
             {
-                Console.WriteLine("Module Initializer successfully injected in assembly " + task.AssemblyFile);
+                injector.Inject(assemblyFile, moduleInitializer, keyfile);
+                Console.WriteLine("Module Initializer successfully injected in assembly " + assemblyFile);
+                return 0;
             }
-            return result;
+            catch (InjectionException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
         }
         
         static void PrintHelp()
         {
             Console.Error.WriteLine(@"
-InjectModuleInitializer.exe [/m:<method>] filename
+InjectModuleInitializer.exe [options] filename
 
 /m:<method>                   Specify the method to be run as the module  
 /moduleinitializer:<method>   initializer. Written as full name of containing
@@ -84,6 +98,13 @@ InjectModuleInitializer.exe [/m:<method>] filename
                               look for a type name ModuleInitializer (in any
                               namespace) and look for a method named Run in
                               that type.
+
+/k:<keyfile>                  A strong name key file that will be used to sign
+/keyfile:<keyfile>            the assembly after the module initializer is
+                              injected into it.
+
+filename                      Name of the assembly file (exe or dll) to inject
+                              a module initializer into.
 
 /?                            Prints this help screen.
 

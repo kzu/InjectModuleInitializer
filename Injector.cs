@@ -23,28 +23,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
 using Mono.Collections.Generic;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
+    public class InjectionException : Exception
+    {
+        public InjectionException(string msg) : base(msg) { }
+    }
+
     internal class Injector
     {
-        public delegate void ErrorLogger(string msg, params object[] args);
-        public string AssemblyFile { get; set; }
-        public string ModuleInitializer { get; set; }
-        public ErrorLogger LogError { get; set; }
+        public const string DefaultInitializerClassName = "ModuleInitializer";
+        public const string DefaultInitializerMethodName = "Run";
 
         static Injector()
         {
             AppDomain.CurrentDomain.AssemblyResolve += LoadEmbeddedAssembly;
         }
 
-        static System.Reflection.Assembly LoadEmbeddedAssembly(object sender, ResolveEventArgs args)
+        static Assembly LoadEmbeddedAssembly(object sender, ResolveEventArgs args)
         {
-            string name = args.Name.Substring(0, args.Name.IndexOf(','));
+            
+            string name = new AssemblyName(args.Name).Name;
             string resourceName = typeof(Injector).Namespace + ".lib." + name + ".dll";
             Stream stream = typeof(Injector).Assembly.GetManifestResourceStream(resourceName);
             if (stream == null) {
@@ -60,52 +66,39 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 
         private AssemblyDefinition Assembly { get; set; }
 
-        private string PdbFile
+        private string PdbFile(string assemblyFile)
         {
-            get
+            Debug.Assert(assemblyFile != null);
+            string path = Path.ChangeExtension(assemblyFile, ".pdb");
+            if (File.Exists(path))
             {
-                Debug.Assert(AssemblyFile != null);
-                string path = Path.ChangeExtension(AssemblyFile, ".pdb");
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-                return null;
+                return path;
             }
+            return null;
         }
 
 
-        public bool Execute()
+        public void Inject(string assemblyFile, string moduleInitializer=null, string keyfile=null)
         {
             try
             {
-                if (LogError == null)
+                if (!File.Exists(assemblyFile))
                 {
-                    LogError = (msg, args) => Console.Error.WriteLine("ERROR: " + msg, args);
+                    throw new InjectionException(Errors.AssemblyDoesNotExist(assemblyFile));
                 }
-                if (!File.Exists(AssemblyFile))
+                if (keyfile != null && !File.Exists(keyfile))
                 {
-                    LogError(Errors.AssemblyDoesNotExist(AssemblyFile));
-                    return false;
+                    throw new InjectionException(Errors.KeyFileDoesNotExist(keyfile));
                 }
-                ReadAssembly();
-
-                MethodReference callee = GetCalleeMethod();
-                if (callee == null)
-                {
-                    return false;
-                }
-
+                ReadAssembly(assemblyFile);
+                MethodReference callee = GetCalleeMethod(moduleInitializer);
                 InjectInitializer(callee);
 
-                WriteAssembly();
-
-                return true;
+                WriteAssembly(assemblyFile, keyfile);
             }
             catch (Exception ex)
             {
-                LogError(ex.Message);
-                return false;
+                throw new InjectionException(ex.Message);
             }
         }
 
@@ -127,83 +120,84 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             Debug.Assert(moduleClass != null, "Found no module class!");
         }
 
-        private void WriteAssembly()
+        private void WriteAssembly(string assemblyFile, string keyfile)
         {
             Debug.Assert(Assembly != null);
             var writeParams = new WriterParameters();
-            if (PdbFile != null)
+            if (PdbFile(assemblyFile) != null)
             {
                 writeParams.WriteSymbols = true;
                 writeParams.SymbolWriterProvider = new PdbWriterProvider();
             }
-            Assembly.Write(AssemblyFile, writeParams);
+            if (keyfile != null)
+            {
+                writeParams.StrongNameKeyPair = new StrongNameKeyPair(File.ReadAllBytes(keyfile));
+            }
+            Assembly.Write(assemblyFile, writeParams);
         }
 
-        private void ReadAssembly()
+        private void ReadAssembly(string assemblyFile)
         {
             Debug.Assert(Assembly == null);
             var readParams = new ReaderParameters(ReadingMode.Immediate);
-            if (PdbFile != null)
+            if (PdbFile(assemblyFile) != null)
             {
                 readParams.ReadSymbols = true;
                 readParams.SymbolReaderProvider = new PdbReaderProvider();
             }
-            Assembly = AssemblyDefinition.ReadAssembly(AssemblyFile, readParams);
+            Assembly = AssemblyDefinition.ReadAssembly(assemblyFile, readParams);
         }
 
-        private MethodReference GetCalleeMethod()
+        private MethodReference GetCalleeMethod(string moduleInitializer)
         {
             Debug.Assert(Assembly != null);
             ModuleDefinition module = Assembly.MainModule;
             string methodName;
             TypeDefinition moduleInitializerClass;
-            if (string.IsNullOrEmpty(ModuleInitializer))
+            if (string.IsNullOrEmpty(moduleInitializer))
             {
-                methodName = "Run";
-                moduleInitializerClass = Find(module.Types, t => t.Name == "ModuleInitializer");
+                methodName = DefaultInitializerMethodName;
+                moduleInitializerClass = Find(module.Types, t => t.Name == DefaultInitializerClassName);
                 if (moduleInitializerClass == null)
                 {
-                    LogError(Errors.NoModuleInitializerTypeFound());
-                    return null;
+                    throw new InjectionException(Errors.NoModuleInitializerTypeFound());
                 }
             }
             else
             {
-                if (!ModuleInitializer.Contains("::"))
+                if (!moduleInitializer.Contains("::"))
                 {
-                    LogError(Errors.InvalidFormatForModuleInitializer());
-                    return null;
+                    throw new InjectionException(Errors.InvalidFormatForModuleInitializer());
                 }
-                string typeName = ModuleInitializer.Substring(0, ModuleInitializer.IndexOf("::"));
-                methodName = ModuleInitializer.Substring(typeName.Length + 2);
+                string typeName = moduleInitializer.Substring(0, moduleInitializer.IndexOf("::"));
+                methodName = moduleInitializer.Substring(typeName.Length + 2);
                 moduleInitializerClass = Find(module.Types, t => t.FullName == typeName);
                 if (moduleInitializerClass == null)
                 {
-                    LogError(Errors.TypeNameDoesNotExist(typeName));
-                    return null;
+                    throw new InjectionException(Errors.TypeNameDoesNotExist(typeName));
                 }
             }
 
-            MethodDefinition callee = Find(moduleInitializerClass.Methods, m => m.Name == methodName && m.Parameters.Count == 0);
+            MethodDefinition callee = Find(moduleInitializerClass.Methods, m => m.Name == methodName);
             if (callee == null)
             {
-                LogError(Errors.NoSuitableMethodFoundInType(methodName, moduleInitializerClass.FullName));
-                return null;
+                throw new InjectionException(Errors.MethodNameDoesNotExist(moduleInitializerClass.FullName, methodName));
+            }
+            if (callee.Parameters.Count > 0)
+            {
+                throw new InjectionException(Errors.ModuleInitializerMayNotHaveParameters());
             }
             if (callee.IsPrivate || callee.IsFamily)
             {
-                LogError(Errors.ModuleInitializerMayNotBePrivate());
-                return null;
+                throw new InjectionException(Errors.ModuleInitializerMayNotBePrivate());
             }
-            if (!callee.ReturnType.FullName.Equals("System.Void")) //Comparing the objects themselves doesn't work as of Mono.Cecil 0.9 for some reason...
+            if (!callee.ReturnType.FullName.Equals(typeof(void).FullName)) //Don't compare the types themselves, they might be from different CLR versions.
             {
-                LogError(Errors.ModuleInitializerMustBeVoid());
-                return null;
+                throw new InjectionException(Errors.ModuleInitializerMustBeVoid());
             }
             if (!callee.IsStatic)
             {
-                LogError(Errors.ModuleInitializerMustBeStatic());
-                return null;
+                throw new InjectionException(Errors.ModuleInitializerMustBeStatic());
             }
             return callee;
         }

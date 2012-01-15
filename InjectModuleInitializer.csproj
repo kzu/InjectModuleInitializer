@@ -88,6 +88,9 @@
     <Content Include="Test\Data\test.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Test\Data\NoModuleInitializerTypeFound.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Test\TestRunner.cs" />
     <Compile Include="Test\UnitTests.cs" />
   </ItemGroup>

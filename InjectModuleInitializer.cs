@@ -34,10 +34,16 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         
         public override bool Execute()
         {
-            injector.LogError = Log.LogError;
-            injector.AssemblyFile = AssemblyFile;
-            injector.ModuleInitializer = ModuleInitializer;
-            return injector.Execute();
+            try
+            {
+                injector.Inject(AssemblyFile, ModuleInitializer);
+                return true;
+            }
+            catch (InjectionException ex)
+            {
+                Log.LogError(ex.Message);
+                return false;
+            }
         }
     }
 }

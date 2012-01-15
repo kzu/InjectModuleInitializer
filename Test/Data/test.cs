@@ -1,12 +1,45 @@
+using System;
+using System.Reflection;
+
 class Program {
 
 	public static void Main(){
-		System.Console.Write("<Main>");
+        Assembly ass = Assembly.GetExecutingAssembly();
+		System.Console.WriteLine("<Main>");
+        System.Console.WriteLine("Runtime: " + System.Environment.Version);
+        System.Console.WriteLine("AssemblyRuntime: " + ass.ImageRuntimeVersion);
+        string key = "";
+        foreach (byte b in new AssemblyName(ass.FullName).GetPublicKeyToken()) {
+            key += b.ToString("x");
+        }
+        System.Console.WriteLine("PublicKey: " + key);
 	}
 }
 
 public class ModuleInitializer {
 	public static void Run() {
-		System.Console.WriteLine("<Init>");
+		System.Console.Write("<ModuleInit>");
 	}
-} 
+
+    public static int NotVoid()
+    {
+        return 0;
+    }
+
+    public static void Parameters(int x, double s) { }
+    public void NotStatic() { }
+    private static void Private() { }
+    protected static void Protected() { }
+
+}
+
+namespace NS
+{
+    public class SomeOtherClass
+    {
+        public static void SomeOtherMethod()
+        {
+            System.Console.Write("<ModuleInit>");
+        }
+    }
+}
