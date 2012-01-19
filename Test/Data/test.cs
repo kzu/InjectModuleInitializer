@@ -6,7 +6,7 @@ class Program {
 	public static void Main(){
         Assembly ass = Assembly.GetExecutingAssembly();
 		System.Console.WriteLine("<Main>");
-        System.Console.WriteLine("Runtime: " + System.Environment.Version);
+        System.Console.WriteLine("ClrVersion: " + System.Environment.Version);
         System.Console.WriteLine("AssemblyRuntime: " + ass.ImageRuntimeVersion);
         string key = "";
         foreach (byte b in new AssemblyName(ass.FullName).GetPublicKeyToken()) {

@@ -139,10 +139,21 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         }
 
         [Test]
-        public void ExeExplicitInitializer()
+        public void ExeImplicitInitializer()
         {
-            var result = Build("ExeExplicitInitializer");
+            var result = Build("ExeImplicitInitializer");
             Assert.AreEqual(0, result.Result);
+            new Injector().Inject(@"Test\Data\ExeImplicitInitializer.exe", keyfile: @"Test\Data\testkey.snk");
+            ExecResult execResult = Exec(@"Test\Data\ExeImplicitInitializer.exe", "");
+            Assert.AreEqual(0, execResult.Result);
+            Assert.IsTrue(execResult.StdOut.Contains("<ModuleInit><Main>"));
+            Assert.IsTrue(execResult.StdOut.Contains("ClrVersion: " + RuntimeVersion));
+            Assert.IsTrue(execResult.StdOut.Contains("AssemblyRuntime: v" + RuntimeVersion));
+            Assert.IsTrue(execResult.StdOut.Contains("PublicKey: 6dd84ac5c69bf74"));
+        }
+
+        protected virtual string RuntimeVersion {
+            get { return "2.0.50727"; }
         }
 
 //        [Test]

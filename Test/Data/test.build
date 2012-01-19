@@ -7,7 +7,7 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>Program</StartupObject>
     <OutputPath>.</OutputPath>
-    <SignAssembly Condition="'$(Sign)'=='1'">true</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>testkey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
