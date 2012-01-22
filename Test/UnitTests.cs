@@ -156,21 +156,19 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
             get { return "2.0.50727"; }
         }
 
-//        [Test]
-//        public void TestExeImplicitInitializer()
-//        {
-//            TestExe(@"
-//            class Program {
-//                static void Main(){ System.Console.Write(""<MainMethod>""); }
-//            }
-//
-//            namespace Foo.Bar {
-//                class ModuleInitializer {
-//                    public static void Run() {System.Console.Write(""<ModuleInitializer>"");}
-//                }
-//            }
-//            ", null);
-//        }
+        [Test]
+        public void ExeExplicitInitializer()
+        {
+            var result = Build("ExeExplicitInitializer");
+            Assert.AreEqual(0, result.Result);
+            new Injector().Inject(@"Test\Data\ExeExplicitInitializer.exe","NS.SomeOtherClass::SomeOtherMethod", @"Test\Data\testkey.snk");
+            ExecResult execResult = Exec(@"Test\Data\ExeExplicitInitializer.exe", "");
+            Assert.AreEqual(0, execResult.Result);
+            Assert.IsTrue(execResult.StdOut.Contains("<ExplicitModuleInit><Main>"));
+            Assert.IsTrue(execResult.StdOut.Contains("ClrVersion: " + RuntimeVersion));
+            Assert.IsTrue(execResult.StdOut.Contains("AssemblyRuntime: v" + RuntimeVersion));
+            Assert.IsTrue(execResult.StdOut.Contains("PublicKey: 6dd84ac5c69bf74"));
+        }
 
 //        [Test]
 //        public void TestDllSuccess()
@@ -226,7 +224,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
 
         private ExecResult Build(string outputName, string codefile="test.cs")
         {
-            return Exec(MSBuild, string.Format(@"/p:AssemblyName={0};CodeFile={1} Test\Data\test.build", outputName, codefile));
+            if (File.Exists(outputName)) {
+                File.Delete(outputName);
+            }
+            return Exec(MSBuild, string.Format(@"/p:AssemblyName={0};CodeFile={1} /target:Clean;Build Test\Data\test.build", outputName, codefile));
         }
 
     }
@@ -236,6 +237,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         protected override string MSBuild
         {
             get { return @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"; }
+        }
+        protected override string RuntimeVersion
+        {
+            get { return "4.0.30319"; }
         }
     }
 

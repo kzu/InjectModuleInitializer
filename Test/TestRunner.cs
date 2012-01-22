@@ -44,7 +44,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
                         Console.Write("    "+ method.Name);
                         try
                         {
-                            method.Invoke(new InjectModuleInitializerTest(), new object[0]);
+                            method.Invoke(Activator.CreateInstance(t), new object[0]);
                             WriteColored("\r    " + method.Name, ConsoleColor.Green);
                             success++;
                         }

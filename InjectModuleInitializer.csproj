@@ -120,6 +120,7 @@
   <ItemGroup>
     <None Include="Test\Data\test.build">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Test\Data\testkey.snk">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

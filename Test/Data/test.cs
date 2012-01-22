@@ -39,7 +39,7 @@ namespace NS
     {
         public static void SomeOtherMethod()
         {
-            System.Console.Write("<ModuleInit>");
+            System.Console.Write("<ExplicitModuleInit>");
         }
     }
 }
