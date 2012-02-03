@@ -1,11 +1,10 @@
 ﻿/* 
 InjectModuleInitializer
 
-MSBuild task and command line program to inject a module initializer
-into a .NET assembly
+Command line program to inject a module initializer into a .NET assembly.
 
 Copyright (C) 2009-2012 Einar Egilsson
-http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
+http://einaregilsson.com/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -53,5 +52,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.3.0.0")]
+[assembly: AssemblyFileVersion("1.3.0.0")]

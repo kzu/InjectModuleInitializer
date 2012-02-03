@@ -1,11 +1,10 @@
 ﻿/* 
 InjectModuleInitializer
 
-MSBuild task and command line program to inject a module initializer
-into a .NET assembly
+Command line program to inject a module initializer into a .NET assembly.
 
 Copyright (C) 2009 Einar Egilsson
-http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
+http://einaregilsson.com/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -125,17 +124,9 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
       
         private void BuildAndFailInject(string errorMsg, string assemblyName, string moduleInitializer = null, string keyfile = null, string codefile = "test.cs")
         {
-            var result = Build(assemblyName, codefile);
-            Assert.AreEqual(0, result.Result);
-            try
-            {
-                new Injector().Inject(string.Format(@"Test\Data\{0}.exe",assemblyName) , moduleInitializer, keyfile);
-                Assert.Fail("Should have thrown exception");
-            }
-            catch (InjectionException ex)
-            {
-                Assert.AreEqual(errorMsg, ex.Message);
-            }
+            var result = Build(assemblyName, codefile, moduleInitializer);
+            Assert.IsTrue(result.StdOut.Contains(errorMsg));
+            Assert.AreNotEqual(0, result.Result);
         }
 
         [Test]
@@ -143,56 +134,33 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         {
             var result = Build("ExeImplicitInitializer");
             Assert.AreEqual(0, result.Result);
-            new Injector().Inject(@"Test\Data\ExeImplicitInitializer.exe", keyfile: @"Test\Data\testkey.snk");
             ExecResult execResult = Exec(@"Test\Data\ExeImplicitInitializer.exe", "");
             Assert.AreEqual(0, execResult.Result);
             Assert.IsTrue(execResult.StdOut.Contains("<ModuleInit><Main>"));
-            Assert.IsTrue(execResult.StdOut.Contains("ClrVersion: " + RuntimeVersion));
-            Assert.IsTrue(execResult.StdOut.Contains("AssemblyRuntime: v" + RuntimeVersion));
-            Assert.IsTrue(execResult.StdOut.Contains("PublicKey: 6dd84ac5c69bf74"));
+            AssertRuntimeAndSigning(execResult.StdOut);
         }
 
         protected virtual string RuntimeVersion {
             get { return "2.0.50727"; }
         }
 
+        private void AssertRuntimeAndSigning(string output)
+        {
+            Assert.IsTrue(output.Contains("ClrVersion: " + RuntimeVersion));
+            Assert.IsTrue(output.Contains("AssemblyRuntime: v" + RuntimeVersion));
+            Assert.IsTrue(output.Contains("PublicKey: 6dd84ac5c69bf74"));
+        }
+
         [Test]
         public void ExeExplicitInitializer()
         {
-            var result = Build("ExeExplicitInitializer");
+            var result = Build("ExeExplicitInitializer", moduleInitializer:"NS.SomeOtherClass::SomeOtherMethod");
             Assert.AreEqual(0, result.Result);
-            new Injector().Inject(@"Test\Data\ExeExplicitInitializer.exe","NS.SomeOtherClass::SomeOtherMethod", @"Test\Data\testkey.snk");
             ExecResult execResult = Exec(@"Test\Data\ExeExplicitInitializer.exe", "");
             Assert.AreEqual(0, execResult.Result);
             Assert.IsTrue(execResult.StdOut.Contains("<ExplicitModuleInit><Main>"));
-            Assert.IsTrue(execResult.StdOut.Contains("ClrVersion: " + RuntimeVersion));
-            Assert.IsTrue(execResult.StdOut.Contains("AssemblyRuntime: v" + RuntimeVersion));
-            Assert.IsTrue(execResult.StdOut.Contains("PublicKey: 6dd84ac5c69bf74"));
+            AssertRuntimeAndSigning(execResult.StdOut);
         }
-
-//        [Test]
-//        public void TestDllSuccess()
-//        {
-//            string dll = CompileAssembly(@"
-//                public class Empty {
-//                    public static string NeverSet;
-//                }
-//
-//                public class ModuleInitializer {
-//                    public static void Run() {
-//                        Empty.NeverSet = ""SetByModuleInitializer"";
-//                    }
-//                }   
-//
-//            ", false);
-//            var injector = new Injector();
-//            injector.Inject(dll, null);
-//            Assembly ass = Assembly.Load(File.ReadAllBytes(dll));
-//            Type t = ass.GetType("Empty");
-//            string value = (string)t.GetField("NeverSet").GetValue(null);
-//            Assert.AreEqual("SetByModuleInitializer", value);
-//            File.Delete(dll);
-//        }
 
         protected virtual string MSBuild
         {
@@ -222,12 +190,17 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
             return new ExecResult { Result = p.ExitCode, StdErr = p.StandardError.ReadToEnd(), StdOut = p.StandardOutput.ReadToEnd() };
         }
 
-        private ExecResult Build(string outputName, string codefile="test.cs")
+        private ExecResult Build(string outputName, string codefile="test.cs", string moduleInitializer=null)
         {
             if (File.Exists(outputName)) {
                 File.Delete(outputName);
             }
-            return Exec(MSBuild, string.Format(@"/p:AssemblyName={0};CodeFile={1} /target:Clean;Build Test\Data\test.build", outputName, codefile));
+            string props = string.Format("AssemblyName={0};CodeFile={1}", outputName, codefile);
+            if (moduleInitializer != null)
+            {
+                props += ";ModuleInitializer=" + moduleInitializer;
+            }
+            return Exec(MSBuild, "/p:" + props + @" /target:Clean;Build Test\Data\test.build");
         }
 
     }

@@ -1,11 +1,10 @@
 ﻿/* 
 InjectModuleInitializer
 
-MSBuild task and command line program to inject a module initializer
-into a .NET assembly
+Command line program to inject a module initializer into a .NET assembly.
 
 Copyright (C) 2009-2012 Einar Egilsson
-http://einaregilsson.com/2009/12/16/module-initializers-in-csharp/
+http://einaregilsson.com/module-initializers-in-csharp/
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Text.RegularExpressions;
 using EinarEgilsson.Utilities.InjectModuleInitializer.Test;
+using System.Reflection;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
@@ -45,7 +45,8 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 return 1;
             }
 
-            Console.WriteLine("InjectModuleInitializer v1.2");
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            Console.WriteLine("InjectModuleInitializer v{0}.{1}", version.Major, version.Minor);
             Console.WriteLine("");
             
             string assemblyFile, moduleInitializer=null, keyfile=null;
@@ -53,7 +54,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 
             for (int i = 0; i < args.Length - 1; i++)
             {
-                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer:)?(.+)", RegexOptions.IgnoreCase);
+                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer)?:(.+)", RegexOptions.IgnoreCase);
                 if (initMatch.Success)
                 {
                     moduleInitializer = initMatch.Groups[2].Value;
@@ -65,7 +66,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 }
                 if (!initMatch.Success && !keyMatch.Success)
                 {
-                    Console.Error.WriteLine("ERROR: Invalid argument '{0}', type InjectModuleInitializer /? for help", args[0]);
+                    Console.Error.WriteLine("error: Invalid argument '{0}', type InjectModuleInitializer /? for help", args[0]);
                     return 1;
                 }
             }
@@ -78,7 +79,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             }
             catch (InjectionException ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                Console.Error.WriteLine("error: " + ex.Message);
                 return 1;
             }
         }
@@ -86,7 +87,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         static void PrintHelp()
         {
             Console.Error.WriteLine(@"
-InjectModuleInitializer.exe [options] filename
+InjectModuleInitializer.exe [/m:<method>] [/k:<keyfile>] filename
 
 /m:<method>                   Specify the method to be run as the module  
 /moduleinitializer:<method>   initializer. Written as full name of containing
@@ -108,10 +109,9 @@ filename                      Name of the assembly file (exe or dll) to inject
 
 /?                            Prints this help screen.
 
-Additional information about this program, including how to use it as
-a MSBuild task, can be found at the url:
+Additional information about this program can be found at the url:
 
-  http://einaregilsson.com/2009/12/16/module-initializers-in-csharp
+  http://einaregilsson.com/module-initializers-in-csharp/
 ");
         }
 
