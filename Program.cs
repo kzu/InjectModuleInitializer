@@ -53,7 +53,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 
             for (int i = 0; i < args.Length - 1; i++)
             {
-                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer:)?(.+)", RegexOptions.IgnoreCase);
+                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer)?:(.+)", RegexOptions.IgnoreCase);
                 if (initMatch.Success)
                 {
                     moduleInitializer = initMatch.Groups[2].Value;
