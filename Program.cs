@@ -54,12 +54,12 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 
             for (int i = 0; i < args.Length - 1; i++)
             {
-                var initMatch = Regex.Match(args[0], "^/m(oduleinitializer)?:(.+)", RegexOptions.IgnoreCase);
+                var initMatch = Regex.Match(args[i], "^/m(oduleinitializer)?:(.+)", RegexOptions.IgnoreCase);
                 if (initMatch.Success)
                 {
                     moduleInitializer = initMatch.Groups[2].Value;
                 }
-                var keyMatch = Regex.Match(args[0], "^/k(eyfile)?:(.+)", RegexOptions.IgnoreCase);
+                var keyMatch = Regex.Match(args[i], "^/k(eyfile)?:(.+)", RegexOptions.IgnoreCase);
                 if (keyMatch.Success)
                 {
                     keyfile = keyMatch.Groups[2].Value;
