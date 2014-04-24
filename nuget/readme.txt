@@ -8,14 +8,26 @@ _________ _______  ______   _______
    | |   | (___) || (__/  )| (___) |(_)
    )_(   (_______)(______/ (_______)   
                                        
-
-1) Open ModuleInitializer.cs.
+1) Open ModuleInitializer.cs. Note the documentation at the top.
 2) Add initialization logic to the Run method's body.
 
+********************************************************************************
+
+********************************************************************************
+ _______  ______   _______          _________
+(  ___  )(  ___ \ (  ___  )|\     /|\__   __/
+| (   ) || (   ) )| (   ) || )   ( |   ) (   
+| (___) || (__/ / | |   | || |   | |   | |   
+|  ___  ||  __ (  | |   | || |   | |   | |   
+| (   ) || (  \ \ | |   | || |   | |   | |   
+| )   ( || )___) )| (___) || (___) |   | |   
+|/     \||/ \___/ (_______)(_______)   )_(   
+                                             
 The InjectModuleInitializer nuget package modifies your project file, adding
-an "AfterBuild" target. Upon a successful build of your project, the "After
-Build" target runs InjectModuleInitializer.exe. This modifies your compiled
-assembly so that, when loaded, the ModuleInitializer.Run() is called.
+an "AfterBuild" target. The target is configured such that, upon a successful
+build of your project, it runs the InjectModuleInitializer.exe program. This
+program modifies your compiled assembly so that, when it is loaded for the
+first time, ModuleInitializer.Run() is called.
 
 ********************************************************************************
 
@@ -50,3 +62,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ********************************************************************************
+
+ASCII art courtesy of patorjk.com/software/taag/#p=display&f=Epic&t=patorjk.com
