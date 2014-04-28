@@ -9,6 +9,7 @@
         <licenseUrl>https://github.com/einaregilsson/InjectModuleInitializer/blob/master/license.txt</licenseUrl>
         <projectUrl>https://github.com/einaregilsson/InjectModuleInitializer</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <developmentDependency>true</developmentDependency>
         <description>Enables module initialization, as described here: http://einaregilsson.com/module-initializers-in-csharp/.</description>
         <summary>Enables module initialization.</summary>
         <tags>module initializer assembly constructor</tags>
