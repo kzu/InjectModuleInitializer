@@ -16,7 +16,7 @@
     </metadata>
     <files>
         <file src="content\ModuleInitializer.cs.pp" target="content\ModuleInitializer.cs.pp" />
-        <file src="tools\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
+        <file src="..\bin\Release\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
         <file src="tools\install.ps1" target="tools\install.ps1" />
         <file src="tools\uninstall.ps1" target="tools\uninstall.ps1" />
         <file src="readme.txt" target="readme.txt" />
