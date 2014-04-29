@@ -4,9 +4,9 @@ Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, Publi
 $buildProject = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($project.FullName) | Select-Object -First 1
 $projectRoot = $buildProject.Xml;
 
-Foreach ($target in $projectRoot.Targets)
+foreach ($target in $projectRoot.Targets)
 {
-	If ($target.Name -eq "InjectModuleInitializer")
+	if ($target.Name -eq "InjectModuleInitializer")
 	{
 		$projectRoot.RemoveChild($target);
 	}
