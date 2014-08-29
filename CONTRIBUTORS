@@ -7,3 +7,7 @@ for fixing a command line parsing error
 Brian Fresen  https://github.com/bfriesen
 
 for creating the NuGet package.
+
+Jay Guadagnoli https://github.com/jguady
+
+Updated to Mono.Cecil 0.9.5.0
