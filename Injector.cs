@@ -18,6 +18,9 @@ using Mono.Cecil.Pdb;
 using Mono.Collections.Generic;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
+
+
+
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
 {
     public class InjectionException : Exception
