@@ -239,7 +239,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         {
             get { return "12.0"; }
         }
-
     }
 
     public class InjectModuleInitializerTest_4_6 : InjectModuleInitializerTest
