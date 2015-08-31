@@ -25,7 +25,18 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         public static int RunTests()
         {
             int success=0, fail=0;
-            foreach (Type t in new[]{typeof(InjectModuleInitializerTest), typeof(InjectModuleInitializerTest_4_0)}) 
+
+            var baseType = typeof(InjectModuleInitializerTest);
+            var testTypes = new List<Type>();
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (type.IsSubclassOf(baseType))
+                {
+                    testTypes.Add(type);
+                }
+            }
+
+            foreach (Type t in testTypes) 
             {
                 Console.WriteLine("\r\n" + t.Name);
                 foreach (var method in t.GetMethods())

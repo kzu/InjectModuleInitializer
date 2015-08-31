@@ -4,6 +4,7 @@ _ReSharper.InjectModuleInitializer/*
 obj
 *.user
 *.suo
-
+*.nupkg
+.DS_Store
 
 

@@ -21,8 +21,16 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
 {
 
     [TestFixture]
-    public class InjectModuleInitializerTest
+    public abstract class InjectModuleInitializerTest
     {
+
+        protected abstract string RuntimeVersion { get; }
+
+        protected abstract string TargetFramework { get; }
+
+        protected abstract string MSBuild { get; }
+
+        protected abstract string ToolsVersion { get; }
 
         [Test]
         public void AssemblyDoesNotExist()
@@ -129,10 +137,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
             AssertRuntimeAndSigning(execResult.StdOut);
         }
 
-        protected virtual string RuntimeVersion {
-            get { return "2.0.50727"; }
-        }
-
         private void AssertRuntimeAndSigning(string output)
         {
             Assert.IsTrue(output.Contains("ClrVersion: " + RuntimeVersion));
@@ -149,11 +153,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
             Assert.AreEqual(0, execResult.Result);
             Assert.IsTrue(execResult.StdOut.Contains("<ExplicitModuleInit><Main>"));
             AssertRuntimeAndSigning(execResult.StdOut);
-        }
-
-        protected virtual string MSBuild
-        {
-            get { return @"C:\Windows\Microsoft.NET\Framework\v3.5\msbuild.exe"; }
         }
 
         private class ExecResult
@@ -189,11 +188,37 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
             {
                 props += ";ModuleInitializer=" + moduleInitializer;
             }
-            return Exec(MSBuild, "/p:" + props + @" /target:Clean;Build Test\Data\test.build");
+
+            props += ";TargetFrameworkVersion=" + this.TargetFramework;
+            return Exec(MSBuild, "/tv:" + this.ToolsVersion + " /p:" + props + @" /target:Clean;Build Test\Data\test.build");
         }
 
     }
 
+
+    public class InjectModuleInitializerTest_2_0 : InjectModuleInitializerTest
+    {
+        protected override string MSBuild
+        {
+            get { return @"C:\Windows\Microsoft.NET\Framework\v3.5\msbuild.exe"; }
+        }
+
+        protected override string RuntimeVersion
+        {
+            get { return "2.0.50727"; }
+        }
+
+        protected override string TargetFramework
+        {
+            get { return "v2.0"; }
+        }
+
+        protected override string ToolsVersion
+        {
+            get { return "2.0"; }
+        }
+
+    }
     public class InjectModuleInitializerTest_4_0 : InjectModuleInitializerTest
     {
         protected override string MSBuild
@@ -204,6 +229,40 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer.Test
         {
             get { return "4.0.30319"; }
         }
+
+        protected override string TargetFramework
+        {
+            get { return "v4.0"; }
+        }
+
+        protected override string ToolsVersion
+        {
+            get { return "12.0"; }
+        }
+
+    }
+
+    public class InjectModuleInitializerTest_4_6 : InjectModuleInitializerTest
+    {
+        protected override string MSBuild
+        {
+            get { return @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"; }
+        }
+        protected override string RuntimeVersion
+        {
+            get { return "4.0.30319"; }
+        }
+
+        protected override string TargetFramework
+        {
+            get { return "v4.6"; }
+        }
+
+        protected override string ToolsVersion
+        {
+            get { return "14.0"; }
+        }
+
     }
 
 }
