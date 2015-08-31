@@ -2,20 +2,21 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>InjectModuleInitializer</id>
-        <version>1.3.0</version>
+        <version>1.3.1</version>
         <title>Module Initializer</title>
         <authors>Einar Egilsson</authors>
         <owners>Einar Egilsson</owners>
         <licenseUrl>https://github.com/einaregilsson/InjectModuleInitializer/blob/master/license.txt</licenseUrl>
         <projectUrl>https://github.com/einaregilsson/InjectModuleInitializer</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <developmentDependency>true</developmentDependency>
         <description>Enables module initialization, as described here: http://einaregilsson.com/module-initializers-in-csharp/.</description>
         <summary>Enables module initialization.</summary>
         <tags>module initializer assembly constructor</tags>
     </metadata>
     <files>
         <file src="content\ModuleInitializer.cs.pp" target="content\ModuleInitializer.cs.pp" />
-        <file src="tools\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
+        <file src="..\bin\Release\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
         <file src="tools\install.ps1" target="tools\install.ps1" />
         <file src="tools\uninstall.ps1" target="tools\uninstall.ps1" />
         <file src="readme.txt" target="readme.txt" />
