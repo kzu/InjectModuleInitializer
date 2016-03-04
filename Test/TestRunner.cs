@@ -6,7 +6,7 @@ InjectModuleInitializer
 
 Command line program to inject a module initializer into a .NET assembly.
 
-Copyright (C) 2009-2012 Einar Egilsson
+Copyright (C) 2009-2016 Einar Egilsson
 http://einaregilsson.com/module-initializers-in-csharp/
 
 This program is licensed under the MIT license: http://opensource.org/licenses/MIT

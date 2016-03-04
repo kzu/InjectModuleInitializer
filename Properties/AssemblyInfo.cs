@@ -3,7 +3,7 @@ InjectModuleInitializer
 
 Command line program to inject a module initializer into a .NET assembly.
 
-Copyright (C) 2009-2012 Einar Egilsson
+Copyright (C) 2009-2016 Einar Egilsson
 http://einaregilsson.com/module-initializers-in-csharp/
 
 This program is licensed under the MIT license: http://opensource.org/licenses/MIT
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Einar Egilsson")]
 [assembly: AssemblyProduct("InjectModuleInitializer")]
-[assembly: AssemblyCopyright("Copyright © Einar Egilsson 2009-2012")]
+[assembly: AssemblyCopyright("Copyright © Einar Egilsson 2009-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,5 +41,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.0.0")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
+[assembly: AssemblyVersion("1.5.0.0")]
+[assembly: AssemblyFileVersion("1.5.0.0")]
