@@ -127,7 +127,15 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         private void ReadAssembly(string assemblyFile)
         {
             Debug.Assert(Assembly == null);
-            var readParams = new ReaderParameters(ReadingMode.Immediate);
+
+            var resolver = new DefaultAssemblyResolver();
+            resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyFile));
+
+            var readParams = new ReaderParameters(ReadingMode.Immediate)
+            {
+                AssemblyResolver = resolver
+            };
+            
             if (PdbFile(assemblyFile) != null)
             {
                 readParams.ReadSymbols = true;
