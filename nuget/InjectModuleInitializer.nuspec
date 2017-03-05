@@ -15,10 +15,9 @@
         <tags>module initializer assembly constructor</tags>
     </metadata>
     <files>
-        <file src="content\ModuleInitializer.cs.pp" target="content\ModuleInitializer.cs.pp" />
-        <file src="..\bin\Release\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
-        <file src="tools\install.ps1" target="tools\install.ps1" />
-        <file src="tools\uninstall.ps1" target="tools\uninstall.ps1" />
-        <file src="readme.txt" target="readme.txt" />
-    </files>
+		<file src="readme.txt" target="readme.txt" />
+		<file src="lib\net20\*.*" target="lib\net20" />
+		<file src="build\*.*" target="build" />
+		<file src="..\bin\Release\InjectModuleInitializer.exe" target="tools\InjectModuleInitializer.exe" />
+	</files>
 </package>

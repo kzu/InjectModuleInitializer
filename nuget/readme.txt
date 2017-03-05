@@ -8,7 +8,16 @@ _________ _______  ______   _______
    | |   | (___) || (__/  )| (___) |(_)
    )_(   (_______)(______/ (_______)   
                                        
-1) Open ModuleInitializer.cs. Note the documentation at the top.
+1) Add the following class to your project:
+
+internal static class ModuleInitializer
+{
+    internal static void Run()
+    {
+        // TODO: Add assembly initialization logic.
+    }
+}
+
 2) Add initialization logic to the Run method's body.
 
 ********************************************************************************
