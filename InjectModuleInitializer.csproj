@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.0.1</PackageVersion>
     <RootNamespace>EinarEgilsson.Utilities.InjectModuleInitializer</RootNamespace>
     <AssemblyName>InjectModuleInitializer</AssemblyName>
     <TargetFramework>net35</TargetFramework>
@@ -30,8 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="InjectModuleInitializer.props" Pack="true" PackagePath="build\" />
-    <None Update="InjectModuleInitializer.targets" Pack="true" PackagePath="build\" />
+    <None Update="InjectModuleInitializer.props" Pack="true" PackagePath="build\$(PackageId).props" />
+    <None Update="InjectModuleInitializer.targets" Pack="true" PackagePath="build\$(PackageId).targets" />
     <None Update="readme.txt" Pack="true" PackagePath="readme.txt" />
   </ItemGroup>
 
