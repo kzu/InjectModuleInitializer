@@ -6,5 +6,4 @@ obj
 *.suo
 *.nupkg
 .DS_Store
-
-
+.vs/

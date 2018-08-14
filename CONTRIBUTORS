@@ -7,3 +7,7 @@ for fixing a command line parsing error
 Brian Fresen  https://github.com/bfriesen
 
 for creating the NuGet package and fixing errors.
+
+Daniel Cazzulino https://github.com/kzu
+
+for porting to SDK style and migrating to SDK Pack

@@ -10,7 +10,7 @@ This program is licensed under the MIT license: http://opensource.org/licenses/M
  */
 using System;
 using System.Text.RegularExpressions;
-using EinarEgilsson.Utilities.InjectModuleInitializer.Test;
+//using EinarEgilsson.Utilities.InjectModuleInitializer.Test;
 using System.Reflection;
 
 namespace EinarEgilsson.Utilities.InjectModuleInitializer
@@ -19,14 +19,14 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
     {
         static int Main(string[] args)
         {
-#if DEBUG
-            //I only have VS Express at home and this is the easiest way to debug
-            //the unit tests since there's no test runner and I can't attach to NUnit.
-            if (args.Length == 1 && args[0] == "/runtests")
-            {
-                return TestRunner.RunTests();
-            }
-#endif
+//#if DEBUG
+//            //I only have VS Express at home and this is the easiest way to debug
+//            //the unit tests since there's no test runner and I can't attach to NUnit.
+//            if (args.Length == 1 && args[0] == "/runtests")
+//            {
+//                return TestRunner.RunTests();
+//            }
+//#endif
             var injector = new Injector();
             if (args.Length == 0 || args.Length > 3 || Regex.IsMatch(args[0], @"^((/|--?)(\?|h|help))$"))
             {
@@ -70,6 +70,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             {
                 Console.Error.WriteLine("error: " + ex.Message);
                 return 1;
+            }
+            finally
+            {
+                injector.Dispose();
             }
         }
         

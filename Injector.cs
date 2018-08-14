@@ -25,32 +25,10 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         public InjectionException(string msg) : base(msg) { }
     }
 
-    internal class Injector
+    internal class Injector : IDisposable
     {
         public const string DefaultInitializerClassName = "ModuleInitializer";
         public const string DefaultInitializerMethodName = "Run";
-
-        static Injector()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += LoadEmbeddedAssembly;
-        }
-
-        static Assembly LoadEmbeddedAssembly(object sender, ResolveEventArgs args)
-        {
-            
-            string name = new AssemblyName(args.Name).Name;
-            string resourceName = typeof(Injector).Namespace + ".lib." + name + ".dll";
-            Stream stream = typeof(Injector).Assembly.GetManifestResourceStream(resourceName);
-            if (stream == null) {
-                return null;
-            }
-            using (stream) {
-                byte[] buf = new byte[stream.Length];
-                stream.Read(buf,0, buf.Length);
-                return System.Reflection.Assembly.Load(buf);
-            }
-        }
-
 
         private AssemblyDefinition Assembly { get; set; }
 
@@ -64,7 +42,6 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             }
             return null;
         }
-
 
         public void Inject(string assemblyFile, string moduleInitializer=null, string keyfile=null)
         {
@@ -93,7 +70,7 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         private void InjectInitializer(MethodReference callee)
         {
             Debug.Assert(Assembly != null);
-            TypeReference voidRef = Assembly.MainModule.Import(callee.ReturnType);
+            TypeReference voidRef = Assembly.MainModule.ImportReference(callee.ReturnType);
             const MethodAttributes attributes = MethodAttributes.Static
                                                 | MethodAttributes.SpecialName
                                                 | MethodAttributes.RTSpecialName;
@@ -133,7 +110,8 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
 
             var readParams = new ReaderParameters(ReadingMode.Immediate)
             {
-                AssemblyResolver = resolver
+                AssemblyResolver = resolver,
+                InMemory = true
             };
             
             if (PdbFile(assemblyFile) != null)
@@ -209,6 +187,11 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
                 }
             }
             return null;
+        }
+
+        public void Dispose()
+        {
+            Assembly.Dispose();
         }
     }
 }
