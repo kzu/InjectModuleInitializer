@@ -8,6 +8,7 @@
     <DefaultItemExcludes>*.binlog;Test\**\*.*;nuget\**\*.*</DefaultItemExcludes>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NoWarn>NU5105</NoWarn>
 
     <Description>Enables module initialization, as described here: http://einaregilsson.com/module-initializers-in-csharp </Description>
     <Company>Einar Egilsson</Company>
