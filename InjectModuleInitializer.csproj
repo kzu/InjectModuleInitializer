@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <PackageVersion>2.0.1</PackageVersion>
     <RootNamespace>EinarEgilsson.Utilities.InjectModuleInitializer</RootNamespace>
     <AssemblyName>InjectModuleInitializer</AssemblyName>
     <TargetFramework>net35</TargetFramework>
@@ -27,6 +26,7 @@
   
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.0" PrivateAssets="all" />
+    <PackageReference Include="GitInfo" Version="2.0.10" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +39,61 @@
     <ItemGroup>
       <BuildOutputInPackage Include="@(ReferencePath -&gt; WithMetadataValue('NuGetPackageId', 'Mono.Cecil'))" />
     </ItemGroup>
+  </Target>
+
+  <PropertyGroup Condition="'$(CI)' == ''">
+    <CI Condition="'$(APPVEYOR)' != '' or '$(TF_BUILD)' == 'true'">true</CI>
+    <CI Condition="'$(CI)' == ''">false</CI>
+  </PropertyGroup>
+
+  <Target Name="Version" DependsOnTargets="SetVersion">
+    <Message Importance="high" Text="PackageVersion=$(PackageVersion)
+AssemblyVersion=$(AssemblyVersion)" />
+    <Message Text="##vso[build.updatebuildnumber]$(PackageVersion)" Importance="high" Condition="'$(TF_BUILD)' == 'true'" />
+  </Target>
+
+  <Target Name="_SetLocalCommits" BeforeTargets="_GitPopulateVersionInfo" Condition="'$(CI)' != 'true'">
+    <PropertyGroup>
+      <!-- Local builds should always be commit count +1, since we'll be always working on the next version to be published. -->
+      <GitCommits>$([MSBuild]::Add('$(GitCommits)', '1'))</GitCommits>
+    </PropertyGroup>
+  </Target>
+
+  <!-- '$(ExcludeRestorePackageImports)' == 'true' when invoking /t:Restore -->
+  <Target Name="SetVersion"
+          BeforeTargets="GetAssemblyVersion;GetPackageVersion;Pack"
+          DependsOnTargets="GitVersion"
+          Condition="'$(ExcludeRestorePackageImports)' != 'true' and '$(GitInfoImported)' == 'true'">
+    <PropertyGroup>
+      <!-- PR builds are *always* prerelease -->
+      <!-- TFS case: BUILD_REASON=PullRequest and BUILD_SOURCEBRANCH=refs/pull/#/merge -->
+      <GitSemVerDashLabel Condition="'$(TF_BUILD)' == 'true' and '$(BUILD_REASON)' == 'PullRequest'">$(GitSemVerDashLabel)-pr$(BUILD_SOURCEBRANCH.Substring(10).TrimEnd('/merge'))</GitSemVerDashLabel>
+      <GitSemVerDashLabel Condition="'$(APPVEYOR_PULL_REQUEST_NUMBER)' != ''">$(GitSemVerDashLabel)-pr$(APPVEYOR_PULL_REQUEST_NUMBER)</GitSemVerDashLabel>
+
+      <!-- Adjust branch name to CI provided value if available -->
+      <GitBranch Condition="'$(SYSTEM_PULLREQUEST_TARGETBRANCH)' != ''">$(SYSTEM_PULLREQUEST_TARGETBRANCH)</GitBranch>
+      <GitBranch Condition="'$(SYSTEM_PULLREQUEST_TARGETBRANCH)' == '' and '$(BUILD_SOURCEBRANCHNAME)' != ''">$(BUILD_SOURCEBRANCHNAME)</GitBranch>
+      <GitBranch Condition="'$(APPVEYOR_REPO_BRANCH)' != ''">$(APPVEYOR_REPO_BRANCH)</GitBranch>
+
+      <!-- NOTE: build metadata does not affect version matching, so even if you work from a different branch+commit that gets 
+           rebased+merged later on, the version # might still be the same (provided there weren't additional commits in master 
+           before the rebase+merge.
+      -->
+      <_IndexOfBranchSlash>$(GitBranch.LastIndexOf('/'))</_IndexOfBranchSlash>
+      <_IndexOfBranchSubstring>$([MSBuild]::Add('$(_IndexOfBranchSlash)', '1'))</_IndexOfBranchSubstring>
+      <_GitBranch Condition="'$(_IndexOfBranchSlash)' != '0'">$(GitBranch.Substring($(_IndexOfBranchSubstring)))</_GitBranch>
+      <_GitBranch Condition="'$(_IndexOfBranchSlash)' == '0'">$(GitBranch)</_GitBranch>
+
+      <!-- We'll use GitFlow and ship publicly from master, meaning we don't need branch metadata from there -->
+      <GitSemVerDashLabel Condition="'$(GitSemVerDashLabel)' == '' and '$(_GitBranch)' != 'master'">-$(_GitBranch)</GitSemVerDashLabel>
+      <SemVerMetadata Condition="'$(GitSemVerDashLabel)' != '-$(_GitBranch)' and '$(_GitBranch)' != 'master'">$(_GitBranch).</SemVerMetadata>
+      <SemVerMetadata>$(SemVerMetadata)sha.$(GitCommit)</SemVerMetadata>
+
+      <AssemblyVersion>$(GitSemVerMajor).$(GitSemVerMinor).$(GitSemVerPatch)</AssemblyVersion>
+      <FileVersion>$(AssemblyVersion)</FileVersion>
+      <PackageVersion>$(FileVersion)$(GitSemVerDashLabel)+$(SemVerMetadata)</PackageVersion>
+      <InformationalVersion>$(PackageVersion)</InformationalVersion>
+    </PropertyGroup>
   </Target>
 
 </Project>
