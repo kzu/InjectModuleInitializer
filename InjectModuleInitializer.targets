@@ -9,7 +9,7 @@
       <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != ''">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
     </PropertyGroup>
 
-    <Exec Command='"$(InjectModuleInitializerTool)" "$(TargetPath)" $(InjectExtraArgs)' />
+    <Exec Command='"$(InjectModuleInitializerTool)" $(InjectExtraArgs) "$(TargetPath)"' />
 
     <!-- Make sure the incremental build doesn't run this target again -->
     <Touch Files="$(IntermediateOutputPath)$(MSBuildProjectName).moduleinitializer.tmp" AlwaysCreate="true" ForceTouch="true" />
