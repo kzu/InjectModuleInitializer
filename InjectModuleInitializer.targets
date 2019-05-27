@@ -6,7 +6,7 @@
           AfterTargets="AfterBuild">
 
     <PropertyGroup>
-      <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != ''">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
+      <InjectExtraArgs Condition="'$(AssemblyOriginatorKeyFile)' != '' and '$(SignAssembly)' == 'true'">/k:"$(AssemblyOriginatorKeyFile)"</InjectExtraArgs>
     </PropertyGroup>
 
     <Exec Command='"$(InjectModuleInitializerTool)" $(InjectExtraArgs) "$(TargetPath)"' />
