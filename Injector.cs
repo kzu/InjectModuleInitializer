@@ -88,12 +88,16 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
         private void WriteAssembly(string assemblyFile, string keyfile)
         {
             Debug.Assert(Assembly != null);
-            var writeParams = new WriterParameters();
+            var writeParams = new WriterParameters()
+                {
+                    WriteSymbols = true, // this takes care of embedded Portable PDB
+                };
+
             if (PdbFile(assemblyFile) != null)
             {
-                writeParams.WriteSymbols = true;
                 writeParams.SymbolWriterProvider = new PdbWriterProvider();
             }
+
             if (keyfile != null)
             {
                 writeParams.StrongNameKeyPair = new StrongNameKeyPair(File.ReadAllBytes(keyfile));
@@ -109,16 +113,17 @@ namespace EinarEgilsson.Utilities.InjectModuleInitializer
             resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyFile));
 
             var readParams = new ReaderParameters(ReadingMode.Immediate)
-            {
-                AssemblyResolver = resolver,
-                InMemory = true
-            };
-            
+                {
+                    AssemblyResolver = resolver,
+                    InMemory = true,
+                    ReadSymbols = true, // this takes care of embedded Portable PDB
+                };
+
             if (PdbFile(assemblyFile) != null)
             {
-                readParams.ReadSymbols = true;
                 readParams.SymbolReaderProvider = new PdbReaderProvider();
             }
+
             Assembly = AssemblyDefinition.ReadAssembly(assemblyFile, readParams);
         }
 
