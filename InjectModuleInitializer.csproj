@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>EinarEgilsson.Utilities.InjectModuleInitializer</RootNamespace>
     <AssemblyName>InjectModuleInitializer</AssemblyName>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net40</TargetFramework>
     <DefaultItemExcludes>*.binlog;Test\**\*.*;nuget\**\*.*</DefaultItemExcludes>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -26,8 +26,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.10.0" PrivateAssets="all" />
-    <PackageReference Include="GitInfo" Version="2.0.10" PrivateAssets="all" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.4" PrivateAssets="all" />
+    <PackageReference Include="GitInfo" Version="2.2.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
